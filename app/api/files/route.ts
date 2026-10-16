@@ -1,5 +1,6 @@
 import { currentUser, serverSupabase } from "../../../lib/supabase/server";
 import { json, sameOrigin } from "../../../lib/http";
+import { evidenceMime, MAX_EVIDENCE_BYTES } from "../../../lib/attachments";
 export const dynamic = "force-dynamic";
 const BUCKET = "mk-evidence";
 export async function GET(request: Request) {
@@ -13,14 +14,14 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return json({ error: "Nieprawidłowe źródło żądania." }, 403);
   const user = await currentUser(); if (!user) return json({ error: "Zaloguj się." }, 401);
-  if (Number(request.headers.get("content-length") ?? 0) > 6 * 1024 * 1024) return json({ error: "Limit pliku to 5 MB." }, 413);
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_EVIDENCE_BYTES + 64 * 1024) return json({ error: "Limit pliku to 4 MB." }, 413);
   const db = await serverSupabase(); let key = "";
   try {
     const form = await request.formData(); const file = form.get("file"), expenseId = String(form.get("expenseId") ?? "");
-    if (!(file instanceof File) || !file.size || file.size > 5 * 1024 * 1024) return json({ error: "Wybierz plik do 5 MB." }, 400);
+    if (!(file instanceof File) || !file.size || file.size > MAX_EVIDENCE_BYTES) return json({ error: "Wybierz plik do 4 MB." }, 400);
     const { data: expense } = await db.from("mk_expenses").select("id").eq("id", expenseId).eq("owner", user.id).maybeSingle(); if (!expense) return json({ error: "Nie znaleziono wydatku." }, 404);
     const buf = await file.arrayBuffer(), b = new Uint8Array(buf);
-    const mime = b[0] === 0x25 && b[1] === 0x50 && b[2] === 0x44 && b[3] === 0x46 ? "application/pdf" : b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff ? "image/jpeg" : b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 ? "image/png" : "";
+    const mime = evidenceMime(b);
     if (!mime) return json({ error: "Obsługiwane formaty to PDF, JPG i PNG." }, 400);
     const id = crypto.randomUUID(); key = user.id + "/" + id; const name = file.name.replace(/[\r\n]/g, "").slice(0, 200);
     const { error: uploadError } = await db.storage.from(BUCKET).upload(key, buf, { contentType: mime, upsert: false }); if (uploadError) throw uploadError;
