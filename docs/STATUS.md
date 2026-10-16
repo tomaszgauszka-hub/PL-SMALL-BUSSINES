@@ -14,12 +14,15 @@
 - Zapisano NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY i NEXT_PUBLIC_APP_URL tylko dla produkcji, po czym przebudowano wdrożenie do stanu Ready.
 - GitHub Actions wykonał kontrolę typów, testy i build poprawnie również po zmianach logowania.
 - Zdiagnozowano rejestrację: Supabase zwraca user_already_exists dla adresu istniejącego we wspólnym Auth. Formularz objaśnia użycie konta TaskOn oraz wspólne hasło.
+- Po zatwierdzeniu zapisano oba adresy powrotu Auth. Potwierdzenie panelu: Successfully added 2 URLs.
+- Produkcyjny test HTTP przeszedł: dwie rzeczywiste rejestracje przez API aplikacji, logowanie, HttpOnly/Secure/SameSite=Lax, zapis klienta/sprzedaży/wpłaty/kosztu, idempotencja, druga sesja tego samego konta, prywatny widok, brak publicznego cache, izolacja drugiego konta, odrzucenie obcego klienta, odrzucenie obcego Origin i wylogowanie.
+- Usunięto dane techniczne w kolejności zależności i oba konta testowe. Baza potwierdziła remaining_fixture_accounts = 0. Nie pozostały pliki dowodowe z testu.
 
-## Pozostałe kroki
+## Identyfikacja Ewidora
 
-Przygotowano dwa dokładne adresy powrotu Auth aplikacji. Zapis do listy Redirect URLs projektu TaskOn oczekuje zatwierdzenia. Główny Site URL pozostawiono bez zmian.
+Nowy symbol i logotyp, granatowo-miętowa paleta, czytelniejsza typografia i spójne widoki pulpitu, formularzy, raportów oraz logowania. Zachowano format wcześniejszych kopii JSON i istniejące dane.
 
-Pozostaje sprawdzenie prywatnej sesji na istniejącym, uprawnionym koncie: logowanie, zapis, odczyt w drugiej przeglądarce i odzyskiwanie hasła. Nie utworzono dodatkowych kont testowych w produkcyjnym Auth.
+Wysyłki rzeczywistej wiadomości odzyskiwania hasła nie testowano na skrzynce użytkownika. Istniejących globalnych szablonów i konfiguracji poczty TaskOn nie zmieniano.
 
 ## Połączenia
 
