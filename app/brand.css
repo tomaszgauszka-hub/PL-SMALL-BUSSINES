@@ -1,0 +1,182 @@
+/* Ewidora — the symbol, wordmark and interface share one palette. */
+:root {
+  --ink: #142c45;
+  --muted: #5a6d82;
+  --green: #087f70;
+  --green-dark: #07685c;
+  --mint: #e6f7f1;
+  --line: #dee6f0;
+  --paper: #f4f7fb;
+  --orange: #b88036;
+  --radius: 16px;
+}
+.brand-lockup { display: inline-flex; align-items: center; gap: 7px; }
+.brand-symbol { width: 47px; height: 47px; object-fit: contain; flex-shrink: 0; }
+.brand-type { display: flex; flex-direction: column; }
+.brand-wordmark { color: #142c45; font-size: 28px; line-height: 1; letter-spacing: -1.1px; font-weight: 750; }
+.brand-dot { color: #17a88f; }
+.brand-type small { display: block; font-size: 7px; font-weight: 650; letter-spacing: .85px; color: #587087; line-height: 1.5; padding-top: 8px; white-space: nowrap; }
+.footer-wordmark { font-weight: 750; font-size: 13px; color: #142c45; letter-spacing: -.35px; }
+.print-header .brand-symbol { width: 42px; height: 42px; }
+.print-header .brand-wordmark { font-size: 28px; }
+
+@media screen {
+  body { font-size: 14px; line-height: 1.6; }
+  button:focus-visible, a:focus-visible { outline-color: #12a38b; }
+  input:focus, select:focus, textarea:focus { border-color: #087f70; box-shadow: 0 0 0 3px #21c3a11c; }
+  .sidebar { background: #fff; border-right-color: #e0e7f0; }
+  .brand { padding-bottom: 29px; }
+  .workspace-label { background: #f8fafc; border-color: #e0e7f0; border-radius: 12px; }
+  .workspace-label strong { color: #263e56; font-size: 12px; }
+  .workspace-label small { color: #63778b; font-size: 10px; }
+  .nav-label { color: #718297; font-size: 9px; letter-spacing: 1.2px; }
+  .sidebar nav button { border-radius: 10px; color: #536a82; font-size: 12px; min-height: 46px; transition: background .15s, color .15s; }
+  .sidebar nav button:hover { color: #142c45; background: #f1f5fa; }
+  .sidebar nav button.active { color: #086b5c; background: #e5f6f0; box-shadow: inset 3px 0 #21c3a1; font-weight: 650; }
+  .sidebar nav button.active svg { color: #087f70; }
+  .sidebar-foot { color: #667b91; }
+  .peace-card { background: linear-gradient(145deg, #142c45, #204b62); border: 0; border-radius: 15px; color: #fff; padding: 20px 16px; }
+  .peace-card h4 { color: #fff; font-size: 15px; letter-spacing: -.35px; }
+  .peace-card p { color: #c8dce6; font-size: 11px; line-height: 1.7; }
+  .peace-card button { color: #6de0c7; font-size: 11px; }
+  .topbar { background: #ffffffed; backdrop-filter: blur(16px); border-bottom-color: #e0e7f0; }
+  .breadcrumbs { color: #63788d; }
+  .breadcrumbs strong { color: #243f58; }
+  .sync-state { color: #597185; font-size: 11px; }
+  .sync-state svg { color: #087f70; }
+  .user-avatar { background: #e5f6f0; color: #08715f; border-color: #f0faf6; }
+  .demo-banner { color: #4c6979; background: #eaf4f9; border-color: #d7e8f1; border-radius: 10px; font-size: 11px; }
+  .demo-banner strong { color: #234b60; }
+  .demo-banner > a { color: #086d60; }
+  .eyebrow { color: #617990; font-weight: 650; letter-spacing: 1.5px; font-size: 9px; }
+  .page-heading h1 { color: #142c45; font-size: clamp(28px, 2.6vw, 35px); letter-spacing: -1.2px; font-weight: 650; }
+  .page-heading p { color: #607489; font-size: 13px; }
+  .btn { border-radius: 9px; font-size: 12px; font-weight: 600; min-height: 41px; }
+  .btn.primary, .btn.dark { background: #142c45; color: #fff; box-shadow: 0 4px 10px #142c4514; }
+  .btn.primary:hover, .btn.dark:hover { background: #234d65; }
+  .btn.secondary, .btn.ghost { background: #fff; border-color: #d9e3ed; color: #354f67; }
+  .btn.secondary:hover, .btn.ghost:hover { background: #f0f6fa; }
+  .period-selector { border-color: #dbe4ed; border-radius: 9px; padding: 6px 10px; }
+  .period-selector select { color: #345269; font-size: 12px; }
+  .period-note { color: #62778c; font-size: 11px; }
+  .metric { border-color: #e0e7ef; border-radius: 15px; padding: 21px; box-shadow: 0 3px 14px #142c4504; }
+  .metric-top { color: #587086; font-size: 12px; }
+  .metric > strong { color: #142c45; font-size: clamp(24px, 2.15vw, 32px); letter-spacing: -1px; margin-top: 13px; }
+  .metric > small { color: #697b8d; font-size: 10px; }
+  .metric-icon { background: #e6f7f1; color: #087f70; border-radius: 10px; width: 34px; height: 34px; }
+  .metric-icon.orange { background: #fff3e6; color: #a86e29; }
+  .metric-icon.blue { background: #eaf1fa; color: #4779aa; }
+  .metric-icon.purple { background: #f0edfb; color: #8263b3; }
+  .panel { border-color: #e0e7ef; box-shadow: 0 3px 16px #142c4503; }
+  .panel-heading h2 { color: #243e57; font-size: 14px; font-weight: 650; }
+  .panel-heading p { color: #6a7d90; font-size: 11px; }
+  .chart-legend, .chart-y, .bar-column > span { color: #637a90; }
+  .chart-legend i { background: #28b399; }
+  .chart-legend span:last-child i { background: #d1aa75; }
+  .chart-grid i { border-color: #e9eef4; }
+  .bar.income { background: #7bcdbb; }
+  .bar.expense { background: #d8b88a; }
+  .bar-column.current > .bar-pair > .income { background: #16a58b; }
+  .bar-column.current > span { color: #08715f; }
+  .chart-footer { color: #61788b; border-color: #e7edf3; }
+  .chart-footer strong { color: #2d5267; }
+  .chart-footer button { color: #087b6a; }
+  .gauge-bg { stroke: #eaf0f5; }
+  .gauge-fill { stroke: #21b79a; }
+  .gauge-fill.warning { stroke: #c58e47; }
+  .gauge-value strong { color: #142c45; }
+  .gauge-value small, .limit-hint, .limit-amount { color: #647b8e; }
+  .limit-amount strong { color: #2a4c61; }
+  .limit-remaining { background: #edf8f4; color: #53766d; border-radius: 9px; }
+  .limit-remaining strong { color: #086e5d; }
+  th { background: #f7f9fc; color: #61778c; font-size: 10px; border-color: #e9eef4; }
+  td { color: #4f667d; font-size: 12px; border-color: #edf1f6; }
+  .table-link strong, td strong { color: #263f57; font-size: 12px; }
+  td small { color: #6c8094; }
+  .row-avatar { background: #eaf2f8; color: #3a647f; }
+  .badge.green { background: #e6f6ef; color: #14735b; }
+  .badge.orange, .badge.amber { background: #fff3e3; color: #8a5b26; }
+  .badge.gray { background: #edf2f7; color: #5b7085; }
+  .text-button { color: #087d6b; }
+  .tax-reminder { background: linear-gradient(135deg, #e1f3ef, #edf3fa); border-color: #d4e7e5; border-radius: 16px; }
+  .tax-reminder h2 { color: #193f4d; font-size: 25px; letter-spacing: -.8px; }
+  .tax-reminder > p, .tax-reminder .deadline { color: #567783; }
+  .tax-reminder > button { color: #086d60; }
+  .tax-estimate { background: #142c45; color: #fff; }
+  .tax-estimate p, .tax-estimate > small, .tax-estimate > div { color: #d0dfea; }
+  .tax-big { color: #fff; }
+  .client-card h3 { color: #243e57; }
+  .client-contact { color: #5e758b; }
+  .client-initial { background: #e7f6f0; color: #08725f; }
+  .client-card-bottom strong { color: #243e57; }
+  .field { color: #405a72; }
+  .field small, .form-actions small { color: #687e93; }
+  .field input, .field select, .field textarea { color: #263e56; border-color: #d6e1ec; border-radius: 9px; min-height: 43px; font-size: 13px; }
+  .notice.info { background: #edf5fb; color: #365d79; border-color: #d4e6f3; }
+  .notice.amber { color: #82551f; background: #fff6e8; border-color: #efdfc4; }
+  .modal { border-radius: 18px; box-shadow: 0 24px 90px #10273c30; }
+  .modal h2 { color: #142c45; }
+  .main-footer { color: #6e8296; font-size: 10px; }
+  .main-footer button { color: #59738b; font-size: 10px; }
+  .auth-page { max-width: none; background: radial-gradient(ellipse at 8% 14%, #dff4ed, transparent 45%), radial-gradient(ellipse at 95% 95%, #e3ecf8, transparent 40%), #f4f7fb; }
+  .auth-back { color: #49667e; }
+  .auth-layout { max-width: 1090px; gap: 80px; }
+  .auth-story > .brand { margin-bottom: 48px; }
+  .auth-story .brand-symbol { width: 55px; height: 55px; }
+  .auth-story .brand-wordmark { font-size: 36px; }
+  .auth-story .brand-type small { font-size: 8px; letter-spacing: 1.2px; }
+  .auth-story h1 { color: #142c45; font-size: clamp(38px, 4.2vw, 56px); letter-spacing: -2px; line-height: 1.12; font-weight: 650; }
+  .auth-story > p { color: #506d83; line-height: 1.85; font-size: 15px; max-width: 430px; }
+  .auth-points { color: #345e6b; font-size: 13px; }
+  .auth-points svg { color: #0b927a; }
+  .auth-security { color: #345e70; border-color: #d1e2e8; }
+  .auth-security small { color: #5e788c; }
+  .auth-lock { background: #e8f7f1; color: #087b67; border-color: #cfe9df; border-radius: 15px; }
+  .auth-card { border-color: #dfe7ef; border-radius: 22px; padding: 38px; box-shadow: 0 22px 70px #142c450a; }
+  .auth-card h2 { color: #19344e; font-weight: 650; font-size: 28px; }
+  .auth-card > p { color: #5c7489; font-size: 12px; margin-bottom: 19px; }
+  .auth-card .field > input { min-height: 48px; }
+  .auth-submit { min-height: 48px; }
+  .auth-text, .auth-switch button { color: #087967; font-size: 12px; }
+  .auth-switch, .auth-demo { color: #627b90; font-size: 11px; }
+  .auth-switch { border-color: #e1e9f0; flex-wrap: wrap; }
+}
+@media screen and (max-width: 1280px) {
+  .brand-symbol { width: 40px; height: 40px; }
+  .brand-wordmark { font-size: 25px; }
+  .brand-type small { font-size: 6px; letter-spacing: .8px; }
+  .metric { padding: 17px; }
+  .metric-top { font-size: 11px; }
+}
+@media screen and (max-width: 800px) {
+  .auth-layout { gap: 25px; }
+  .auth-story h1 { font-size: 39px; letter-spacing: -1.5px; }
+  .auth-story > p { font-size: 13px; }
+  .auth-card { padding: 27px; }
+  .auth-story > .brand { margin-bottom: 28px; }
+  .auth-card .field > input { font-size: 16px; }
+}
+@media screen and (max-width: 760px) {
+  .metric { padding: 16px; }
+  .metric > strong { font-size: 25px; }
+  .metric-top { font-size: 11px; }
+  .page-heading h1 { font-size: 28px; }
+  .page-heading p { font-size: 12px; }
+  .sync-state { font-size: 0; }
+  .sidebar .brand-symbol { width: 47px; height: 47px; }
+  .sidebar .brand-wordmark { font-size: 28px; }
+  .sidebar .brand-type small { font-size: 7px; }
+  .auth-story .brand-wordmark { font-size: 32px; }
+  .main-footer { font-size: 9px; }
+  .main-footer button { font-size: 9px; }
+  .field input, .field select, .field textarea { font-size: 16px; }
+}
+@media screen and (max-width: 390px) {
+  .metric { padding: 13px; }
+  .metric > strong { font-size: 21px; }
+  .metric-top { font-size: 10px; }
+  .page-heading h1 { font-size: 25px; }
+  .auth-card { padding: 22px; }
+  .auth-card h2 { font-size: 25px; }
+  .auth-story h1 { font-size: 35px; }
+}
