@@ -13,7 +13,7 @@ Projekt: plsmallbusiness, ID prj_qfmo2BYDsh4MP2XjHS0fscrs4GLy, zespół team_YoG
 | Build Command | pnpm build |
 | Output Directory | Automatyczna wartość Next.js |
 
-Repozytorium: [PL-SMALL-BUSSINES](https://github.com/tomaszgauszka-hub/PL-SMALL-BUSSINES). Zawartość katalogu aplikacji należy umieścić w głównym katalogu repo, a nie pod dodatkowym katalogiem mala-ksiega.
+Repozytorium: [PL-SMALL-BUSSINES](https://github.com/tomaszgauszka-hub/PL-SMALL-BUSSINES). Kod jest opublikowany w głównym katalogu repozytorium. Produkcja: [plsmallbusiness.vercel.app](https://plsmallbusiness.vercel.app). Główna gałąź uruchamia automatyczne wdrożenia.
 
 Wymagane zmienne środowiskowe produkcji:
 
@@ -21,11 +21,11 @@ Wymagane zmienne środowiskowe produkcji:
 | --- | --- |
 | NEXT_PUBLIC_SUPABASE_URL | https://booexvenlxuyrnamhsoi.supabase.co |
 | NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | Aktywny klucz publishable projektu TaskOn |
-| NEXT_PUBLIC_APP_URL | Faktyczny adres HTTPS produkcji po przydzieleniu domeny |
+| NEXT_PUBLIC_APP_URL | https://plsmallbusiness.vercel.app |
 
 Nie używaj klucza secret/service-role ani hasła PostgreSQL. Podglądom nie przypisuj automatycznie bazy produkcyjnej — bez osobnej konfiguracji pokazują demonstrację.
 
-Obecna ochrona Vercel wymaga SSO poza domenami niestandardowymi. Nie została zmieniona. Publiczna produkcja wymaga świadomego ustalenia zakresu ochrony; podglądy mogą pozostać chronione. Własne logowanie aplikacji i RLS chronią ewidencję niezależnie od ustawień Vercel.
+Produkcja odpowiada publicznie HTTP 200. Nie wyłączano ochrony SSO całego projektu. Własne logowanie aplikacji i RLS chronią ewidencję niezależnie od ustawień Vercel. Publicznych zmiennych produkcyjnej bazy nie dodano do podglądów.
 
 ## Supabase — istniejący TaskOn
 
@@ -39,16 +39,18 @@ Dalsze migracje muszą dotyczyć obiektów tej aplikacji i uwzględniać histori
 
 Pozostaw istniejący Site URL, szablony wiadomości, SMTP oraz ustawienia rejestracji TaskOn. Nie wklejaj globalnie konfiguracji lokalnego supabase/config.toml ani szablonów z tego repozytorium.
 
-Po ustaleniu rzeczywistego hosta produkcji dodaj do Supabase Authentication → URL Configuration → Redirect URLs dokładnie:
+Przygotowane adresy w Supabase Authentication → URL Configuration → Redirect URLs (zapis oczekuje zatwierdzenia):
 
 ~~~text
-https://TWOJ_HOST/auth/callback
-https://TWOJ_HOST/auth/callback?next=/reset-password
+https://plsmallbusiness.vercel.app/auth/callback
+https://plsmallbusiness.vercel.app/auth/callback?next=/reset-password
 ~~~
 
 Dodaj adresy do dotychczasowej listy, zachowując obecne wpisy. Standardowy przepływ PKCE wymaga otwarcia potwierdzenia lub resetu w przeglądarce, w której wysłano żądanie. Endpoint /auth/confirm obsługuje także token_hash, jeśli istniejące szablony projektu są z nim zgodne.
 
-Wbudowany nadawca Supabase ma ograniczenia i może obsługiwać tylko adresy członków zespołu. Produkcyjna rejestracja osób spoza zespołu wymaga odpowiedniego SMTP: [dokumentacja](https://supabase.com/docs/guides/auth/auth-smtp).
+Potwierdzanie adresów email i odzyskiwanie haseł wymaga działającej poczty. Przed udostępnieniem tych funkcji sprawdź bieżące ograniczenia nadawcy i konfigurację SMTP: [dokumentacja](https://supabase.com/docs/guides/auth/auth-smtp).
+
+TaskOn ma włączone nowe konta email i wyłączone obowiązkowe potwierdzanie email. Nie zmieniono tych globalnych ustawień. Przy obecnej konfiguracji nowe konto otrzymuje sesję bez wiadomości potwierdzającej; wysyłka resetu hasła nadal wymaga działającej poczty. Istniejące konto TaskOn służy także do Małej Księgi, a zmiana hasła dotyczy obu aplikacji.
 
 ## Weryfikacja wdrożenia
 
@@ -60,4 +62,4 @@ Wbudowany nadawca Supabase ma ograniczenia i może obsługiwać tylko adresy cz�
 6. Sprawdź eksport CSV/JSON oraz ponowny import bez duplikatów.
 7. Bez sesji API aplikacji ma zwracać 401, a POST z obcym Origin — 403.
 
-Kontrole bazy i testy lokalne są zakończone. Pełny test przeglądarka → aplikacja → Auth → baza pozostaje do wykonania po usunięciu blokad zapisu GitHub/Vercel.
+Kontrole bazy, testy lokalne i GitHub Actions są zakończone. Pełny test prywatnej sesji przeglądarka → aplikacja → Auth → baza pozostaje do wykonania na uprawnionym koncie. Adresy powrotu Auth wymagają jeszcze zatwierdzenia.
