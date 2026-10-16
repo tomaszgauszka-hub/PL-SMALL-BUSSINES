@@ -18,7 +18,11 @@ Migracja bazy została wykonana i zweryfikowana w TaskOn. Istniejących 20 tabel
 
 W rzeczywistym PostgreSQL sprawdzono izolację dwóch kont, ponowienie zapisu oraz prywatność metadanych plików. Cały test wycofano transakcją — nie pozostały konta ani dane testowe. Lokalnie przechodzi 35 testów i kompilacja produkcyjna.
 
-Zapis pierwszego pliku do nowego repozytorium GitHub jest blokowany odpowiedzią 403 Resource not accessible by integration. Vercel rozpoznaje projekt plsmallbusiness, ale odrzuca zmianę konfiguracji i zapis zmiennych kodem 403 dla zespołu. Nowa wersja nie została dotąd uruchomiona publicznie; logowanie przez wdrożoną aplikację nie jest jeszcze zweryfikowane.
+Aplikacja działa pod [plsmallbusiness.vercel.app](https://plsmallbusiness.vercel.app). Kod jest w repozytorium, Vercel buduje główną gałąź, a trzy publiczne zmienne Supabase zapisano wyłącznie dla produkcji. GitHub Actions poprawnie wykonuje kontrolę typów, 35 testów i kompilację.
+
+Konta są wspólne z TaskOn: osoba posiadająca tam konto powinna się zalogować tym samym emailem i hasłem. Ponowna rejestracja istniejącego adresu jest odrzucana przez Supabase. Ustawienia TaskOn pozwalają na nowe konta email i obecnie nie wymagają potwierdzenia email; aplikacja respektuje tę konfigurację.
+
+Pozostało zatwierdzenie dwóch dokładnych adresów powrotu Auth w panelu TaskOn, potrzebnych między innymi do odzyskiwania hasła. Pełny test prywatnej sesji i zapisu na produkcji pozostaje do wykonania na uprawnionym koncie.
 
 Szczegóły i dalsze kroki: [WDROZENIE.md](docs/WDROZENIE.md). Raport wykonanych prac: [STATUS.md](docs/STATUS.md).
 
