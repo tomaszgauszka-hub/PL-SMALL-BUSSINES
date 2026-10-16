@@ -1,0 +1,4 @@
+export function json(body: unknown, status = 200) { return Response.json(body, { status, headers: { "Cache-Control": "private, no-store", "Vary": "Cookie", "X-Content-Type-Options": "nosniff" } }); }
+export function sameOrigin(request: Request) { return request.headers.get("origin") === new URL(request.url).origin; }
+export function safeReturnPath(input: string | null, fallback = "/") { if (!input || !input.startsWith("/") || input.startsWith("//") || input.includes("\\")) return fallback; const url = new URL(input, "https://app.invalid"); return url.origin === "https://app.invalid" ? url.pathname + url.search : fallback; }
+export function appOrigin(request: Request) { const value = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin; const url = new URL(value); if (!["https:", "http:"].includes(url.protocol)) throw new Error("Nieprawidłowy adres aplikacji."); return url.origin; }
