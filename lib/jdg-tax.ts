@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Inventory } from "./inventory.ts";
+import { inventoryEffect } from "./inventory.ts";
 import type { BusinessProfile, TaxForm } from "./business.ts";
 import { calculateInvoiceLine } from "./business.ts";
 import type { Invoice, InvoiceState } from "./invoices.ts";
@@ -60,10 +62,11 @@ function outputVatDeclaration(documents: Invoice[], year: number, month: number)
   for (const doc of documents.filter(doc => doc.status === "issued" && doc.direction === "sale" && doc.vatDate.startsWith(`${year}-${String(month).padStart(2, "0")}`))) for (const line of doc.lines) groups.set(line.vatRate, (groups.get(line.vatRate) ?? 0) + calculateInvoiceLine(line).vat);
   return [...groups.values()].reduce((sum, amount) => sum + signedWholeZloty(amount), 0);
 }
-export type JdgTaxMonth = ReturnType<typeof invoiceSummary> & { month: number; input: JdgMonth; pitTaxYtd: number; pitDue: number | null; pitPaid: number; vatDue: number; vatCredit: number; vatRefund: number; vatDeclaredOutput: number; vatDeclaredInput: number; pitDeadline: string; vatDeadline: string; issues: string[] };
-export function calculateJdgTaxes(ledger: InvoiceState, context: JdgTaxState, config: JdgYear, legacy: State) {
+export type JdgTaxMonth = ReturnType<typeof invoiceSummary> & { month: number; input: JdgMonth; pitTaxYtd: number; inventoryAdjustment: number; taxProfitYtd: number; inventoryValid: boolean; pitDue: number | null; pitPaid: number; vatDue: number; vatCredit: number; vatRefund: number; vatDeclaredOutput: number; vatDeclaredInput: number; pitDeadline: string; vatDeadline: string; issues: string[] };
+export function calculateJdgTaxes(ledger: InvoiceState, context: JdgTaxState, config: JdgYear, legacy: State, inventories: Inventory[] = [], jdgStartDate = "") {
   const year = config.year, healthLimit = year === 2026 ? 1410000 : 1290000;
   const rows: JdgTaxMonth[] = [];
+  let unresolvedInventory = false;
   let cumulativeIncome = 0, cumulativeCost = 0, cumulativeSocial = 0, cumulativeHealth = 0, cumulativeHealthInCosts = 0, cumulativeOther = 0, priorDue = 0, deductionCarry = 0, vatCredit = config.vatOpeningCredit;
   for (let month = 1; month <= 12; month++) {
     const input = context.months.find(row => row.year === year && row.month === month) ?? defaultJdgMonth(year, month), summary = invoiceSummary(ledger.documents, ledger.payments, year, month), issues: string[] = [];
@@ -71,23 +74,29 @@ export function calculateJdgTaxes(ledger: InvoiceState, context: JdgTaxState, co
     const healthAllowed = Math.max(0, Math.min(cumulativeHealth, healthLimit) - cumulativeHealthInCosts);
     const healthCostInvalid = config.taxForm === "linear" ? cumulativeHealthInCosts > healthLimit : cumulativeHealthInCosts > 0;
     if (healthCostInvalid) issues.push(config.taxForm === "linear" ? "Składka zdrowotna ujęta w kosztach przekracza roczny limit. Skoryguj koszty." : "Na tej formie opodatkowania składka zdrowotna nie jest kosztem PIT. Skoryguj jej ujęcie.");
-    const base = Math.max(0, cumulativeIncome - cumulativeCost - cumulativeSocial - cumulativeOther - (config.taxForm === "linear" ? healthAllowed : 0));
+    const stock = inventoryEffect(inventories, year, jdgStartDate, month), inventoryAdjustment = config.taxForm === "lump_sum" ? 0 : stock.adjustment;
+    if (config.taxForm !== "lump_sum" && !stock.valid) unresolvedInventory = true;
+    if (unresolvedInventory) issues.push("Brak spisu początkowego dla zatwierdzonego remanentu. Uzupełnij go, aby wyliczyć tę i kolejne zaliczki.");
+    const taxProfitYtd = cumulativeIncome - cumulativeCost + inventoryAdjustment;
+    const base = Math.max(0, taxProfitYtd - cumulativeSocial - cumulativeOther - (config.taxForm === "linear" ? healthAllowed : 0));
     let pitTaxYtd = config.taxForm === "scale" ? scaleWithRelief(base) : linearTax(base), pitDue: number | null;
     if (config.taxForm === "lump_sum") {
       const bucket = lumpSumTax(bucketsFor(ledger.documents, year, month), deductionCarry + input.socialDeduction + input.healthPaid / 2 + input.otherDeductions);
       deductionCarry = Math.max(0, bucket.unused); pitDue = bucket.negativeRates.length ? null : bucket.tax;
       if (pitDue === null) issues.push("Ujemny przychód ryczałtowy dla stawki wymaga sprawdzenia sposobu ujęcia korekty.");
       pitTaxYtd = lumpSumTax(bucketsFor(ledger.documents.filter(doc => Number(doc.taxDate.slice(5, 7)) <= month), year), cumulativeSocial + cumulativeHealth / 2 + cumulativeOther).tax;
-    } else { pitDue = Math.max(0, pitTaxYtd - priorDue); priorDue += pitDue; }
+    } else { pitDue = unresolvedInventory ? null : Math.max(0, pitTaxYtd - priorDue); priorDue += pitDue ?? 0; }
     if (healthCostInvalid || (config.taxForm === "lump_sum" && config.previousYearRevenue !== null && config.previousYearRevenue > lumpSumEligibilityLimit(year)!)) pitDue = null;
     const vatDeclaredOutput = outputVatDeclaration(ledger.documents, year, month), vatDeclaredInput = signedWholeZloty(summary.purchaseVat), difference = vatDeclaredOutput - vatDeclaredInput - vatCredit;
     const excess = Math.max(0, -difference), vatRefund = Math.min(input.vatRefundRequested, excess);
     if (input.vatRefundRequested > excess) issues.push("Kwota VAT wskazana do zwrotu przekracza dostępną nadwyżkę.");
     vatCredit = excess - vatRefund;
-    rows.push({ ...summary, month, input, pitTaxYtd, pitDue, pitPaid: input.pitPaid, vatDue: Math.max(0, difference), vatCredit, vatRefund, vatDeclaredOutput, vatDeclaredInput, pitDeadline: taxPaymentDeadline(year, month, "pit"), vatDeadline: taxPaymentDeadline(year, month, "vat"), issues });
+    rows.push({ ...summary, month, input, pitTaxYtd, inventoryAdjustment, taxProfitYtd, inventoryValid: !unresolvedInventory, pitDue, pitPaid: input.pitPaid, vatDue: Math.max(0, difference), vatCredit, vatRefund, vatDeclaredOutput, vatDeclaredInput, pitDeadline: taxPaymentDeadline(year, month, "pit"), vatDeadline: taxPaymentDeadline(year, month, "vat"), issues });
   }
   const annual = invoiceSummary(ledger.documents, ledger.payments, year), dn = aggregate(legacy, year, 0);
-  const positiveProfit = Math.max(0, annual.profit), businessDeductions = cumulativeOther + config.businessDeductions, healthAllowed = Math.max(0, Math.min(cumulativeHealth, healthLimit) - cumulativeHealthInCosts);
+  const inventory = inventoryEffect(inventories, year, jdgStartDate), inventoryApplicable = config.taxForm !== "lump_sum";
+  const taxProfit = annual.profit + (inventoryApplicable ? inventory.adjustment : 0);
+  const positiveProfit = Math.max(0, taxProfit), businessDeductions = cumulativeOther + config.businessDeductions, healthAllowed = Math.max(0, Math.min(cumulativeHealth, healthLimit) - cumulativeHealthInCosts);
   const businessBase = Math.max(0, positiveProfit - businessDeductions - cumulativeSocial - (config.taxForm === "linear" ? healthAllowed : 0));
   const primaryPaid = rows.reduce((sum, row) => sum + row.pitPaid, 0) + (config.taxForm === "scale" ? config.otherAdvances : 0);
   const combinedScaleBase = Math.max(0, config.otherIncome + Math.max(0, dn.profit) + Math.max(0, positiveProfit - businessDeductions) - cumulativeSocial - config.scaleDeductions);
@@ -101,6 +110,7 @@ export function calculateJdgTaxes(ledger: InvoiceState, context: JdgTaxState, co
   const ineligible = config.taxForm === "lump_sum" && config.previousYearRevenue !== null && config.previousYearRevenue > lumpSumEligibilityLimit(year)!;
   if (ineligible) issues.unshift(`Przychód poprzedniego roku przekracza limit ryczałtu na ${year} r. Wybierz właściwą formę rozliczenia.`);
   if (config.taxForm === "lump_sum" && lump.negativeRates.length) issues.push("Roczny przychód dla jednej ze stawek ryczałtu jest ujemny — sprawdź korekty.");
-  const annualValid = !ineligible && !(config.taxForm === "lump_sum" && lump.negativeRates.length) && !(config.taxForm === "linear" ? cumulativeHealthInCosts > healthLimit : cumulativeHealthInCosts > 0);
-  return { year, taxForm: config.taxForm as TaxForm, rows, annual, dn, primaryTax, primaryPaid, primaryBalance: primaryTax - primaryPaid, secondaryTax, secondaryPaid: config.otherAdvances, secondaryBalance: secondaryTax - config.otherAdvances, businessBase, combinedScaleBase, primaryForm: config.taxForm === "scale" ? "PIT-36" : config.taxForm === "linear" ? "PIT-36L" : "PIT-28", healthAllowed, healthLimit, lump, vatSales, legacyVatSales, vatLimit: vatExemptionLimit(year, config.activityStartDate), annualValid, issues };
+  const annualValid = (!inventoryApplicable || inventory.valid) && !ineligible && !(config.taxForm === "lump_sum" && lump.negativeRates.length) && !(config.taxForm === "linear" ? cumulativeHealthInCosts > healthLimit : cumulativeHealthInCosts > 0);
+  if (inventoryApplicable && !inventory.valid) issues.push("Roczny remanent nie ma spisu początkowego — roczny PIT wymaga uzupełnienia danych.");
+  return { inventory, inventoryApplicable, taxProfit, year, taxForm: config.taxForm as TaxForm, rows, annual, dn, primaryTax, primaryPaid, primaryBalance: primaryTax - primaryPaid, secondaryTax, secondaryPaid: config.otherAdvances, secondaryBalance: secondaryTax - config.otherAdvances, businessBase, combinedScaleBase, primaryForm: config.taxForm === "scale" ? "PIT-36" : config.taxForm === "linear" ? "PIT-36L" : "PIT-28", healthAllowed, healthLimit, lump, vatSales, legacyVatSales, vatLimit: vatExemptionLimit(year, config.activityStartDate), annualValid, issues };
 }
