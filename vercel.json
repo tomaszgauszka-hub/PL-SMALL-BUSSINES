@@ -1,0 +1,8 @@
+{
+  "framework": "nextjs",
+  "regions": [
+    "fra1"
+  ],
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile"
+}
