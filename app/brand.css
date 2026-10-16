@@ -103,6 +103,9 @@
   .tax-reminder > p, .tax-reminder .deadline { color: #567783; }
   .tax-reminder > button { color: #086d60; }
   .tax-estimate { background: #142c45; color: #fff; }
+  .tax-estimate h3, .tax-estimate > div strong { color: #fff; }
+  .tax-estimate .eyebrow { color: #7adfc7; }
+  .tax-estimate > div { border-color: #ffffff26; }
   .tax-estimate p, .tax-estimate > small, .tax-estimate > div { color: #d0dfea; }
   .tax-big { color: #fff; }
   .client-card h3 { color: #243e57; }
