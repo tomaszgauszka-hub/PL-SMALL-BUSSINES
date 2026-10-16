@@ -10,7 +10,7 @@ Polska aplikacja do ewidencji działalności nierejestrowanej: sprzedaż należn
 | Vercel | plsmallbusiness — preset Next.js, Node.js 24 |
 | Supabase | TaskOn, ref booexvenlxuyrnamhsoi |
 | Tabele | 11 tabel public.mk_*; funkcje pomocnicze mk_private |
-| Pliki | Prywatny bucket mk-evidence, PDF/JPG/PNG do 5 MB |
+| Pliki | Prywatny bucket mk-evidence, PDF/JPG/PNG do 4 MB przez API aplikacji |
 
 ## Stan na 16.10.2026
 
@@ -64,3 +64,13 @@ Pliki dowodowe pobierz osobno i dodaj po imporcie w szczegółach wydatków. JSO
 ## Pochodzenie
 
 Implementacja jest własna. Inspiracje funkcjonalne: hipek/sales-registry, patimio66/mojmalybiznes i Pawel-04/Projekt_AI. Nie włączono ich kodu do projektu.
+
+## Rozbudowa o JDG i katalog — etap 1
+
+Dodano wybór DN/JDG przy rejestracji, osobny profil działalności, kontrolowane przejście DN → JDG i katalog produktów/usług z ceną netto, VAT, stawką ryczałtu, archiwizacją oraz kontrolą wersji. Katalog jest uwzględniany w kopii JSON i można go eksportować do CSV. Import nie zmienia rodzaju działalności konta.
+
+Nowa migracja: `20261016143642_business_profiles_and_catalog.sql`. Tabele `mk_business_profiles`, `mk_business_events` i `mk_products` mają RLS. Zapisane typy i katalog nie zmieniają wcześniejszych rozliczeń DN.
+
+**Księgowość JDG, faktury i automatyczne PIT/VAT nie są jeszcze gotowymi funkcjami.** Przygotowano plan, profil podatkowy i dokładny silnik kwot pozycji faktur. Zakres dalszych etapów, reguły i źródła: [PLAN-JDG.md](docs/PLAN-JDG.md). Obecna prognoza PIT pozostaje prognozą DN.
+
+44 testy obejmują też nowe RLS, przejście działalności, konflikty edycji, obliczenia pozycji faktur i błędy załączników.
