@@ -13,8 +13,9 @@ Aplikacja: https://plsmallbusiness.vercel.app/
 - Osobne daty PIT, VAT, otrzymania dokumentu i płatności. Procent odliczenia VAT i udział kosztu PIT. Prywatne załączniki PDF/JPG/PNG do 4 MB.
 - JDG: miesięczna skala, liniowy i ryczałt; odliczenia faktycznie zapłaconych składek, VAT należny/naliczony, nadwyżka do przeniesienia lub zadeklarowanego zwrotu oraz ewidencja wpłat podatków.
 - Pulpit, wykresy i tabele, roczna prognoza, limit VAT z proporcją i wcześniejszą DN, próg skali, limit odliczenia zdrowotnej, kontrola prawa do ryczałtu według przychodu poprzedniego roku.
+- Remanent KPiR: spis początkowy, miesięczny i końcowy, towary obce, wycena, podpisywany wydruk, CSV, historia poprawek i wpływ na PIT skali/liniowego.
 - DN: odrębna ewidencja należności, kasowy PIT-36, kontrola miesięcznych limitów 2025 i kwartalnych 2026, zachowane przekroczenia i terminy CEIDG.
-- CSV dokumentów i podatków, wydruk rocznego raportu JDG, kopia JSON z dopisującym importem faktur, płatności, katalogu i ustawień rozliczeń. Pliki załączników pobiera się osobno.
+- CSV dokumentów i podatków, wydruk rocznego raportu JDG, kopia JSON z dopisującym importem faktur, płatności, katalogu, ustawień rozliczeń i spisów z natury. Pliki załączników pobiera się osobno.
 
 ## Zakres rozliczeń
 
@@ -22,7 +23,7 @@ Lata 2025–2026. Krajowe transakcje PLN i standardowe miesięczne rozliczenia; 
 
 Skala ma jedną kwotę wolną dla połączonych dochodów. Przy liniowym lub ryczałcie dochody DN i inne dochody na skali są prognozowane oddzielnie, bez kompensowania wpłat różnych zeznań. Roczne wyniki są prognozą indywidualną z zapisanych danych. Ustawienia podatku są odrębne dla każdego roku.
 
-Zakres nie obejmuje metod kasowych, rozliczeń kwartalnych, walut i zagranicy, remanentu, środków trwałych, płac, wszystkich ulg ani szczególnych procedur VAT. ZUS jest ewidencją zapłaconych składek, nie kalkulatorem należnych składek. Eksport jest materiałem pomocniczym, a nie kompletną formalną księgą. Aplikacja nie wysyła faktur do KSeF, deklaracji ani JPK.
+Zakres nie obejmuje metod kasowych, rozliczeń kwartalnych, walut i zagranicy, remanentu likwidacyjnego VAT, środków trwałych, płac, wszystkich ulg ani szczególnych procedur VAT. ZUS jest ewidencją zapłaconych składek, nie kalkulatorem należnych składek. Eksport jest materiałem pomocniczym, a nie kompletną formalną księgą. Aplikacja nie wysyła faktur do KSeF, deklaracji ani JPK.
 
 Reguły i źródła urzędowe zweryfikowano 16.10.2026. Szczegóły: [PLAN-JDG.md](docs/PLAN-JDG.md).
 
@@ -33,7 +34,7 @@ Reguły i źródła urzędowe zweryfikowano 16.10.2026. Szczegóły: [PLAN-JDG.m
 | GitHub | tomaszgauszka-hub/PL-SMALL-BUSSINES |
 | Vercel | plsmallbusiness; preset Next.js, Node.js 24 |
 | Supabase | istniejący TaskOn, booexvenlxuyrnamhsoi |
-| Dane | 20 tabel public.mk_*, RLS, prywatne funkcje mk_private |
+| Dane | 21 tabel public.mk_*, RLS, prywatne funkcje mk_private |
 | Pliki | prywatny bucket mk-evidence |
 
 Next.js 16, React 19, TypeScript, Supabase Auth i PostgreSQL. API używa JWT zalogowanego użytkownika i auth.uid(); nie korzysta z klucza service-role. Cookies HttpOnly/Secure/SameSite, brak publicznego cache dla danych prywatnych, kontrola Origin zapisów. Identyfikatory operacji, transakcje, niezmienność wystawionych dokumentów i wersjonowanie edytowalnych rekordów chronią pracę na kilku urządzeniach. Odświeżanie po zapisach, powrocie do karty i co 30 sekund.
@@ -49,7 +50,7 @@ pnpm test
 pnpm build
 ```
 
-70 testów: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych; nie pozostawiono danych testowych. Nowe mechanizmy JDG są sprawdzane osobnym zestawem testów, bez tworzenia kolejnych kont produkcyjnych.
+84 testy: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, remanent miesięczny/roczny, poprawki spisów, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych; nie pozostawiono danych testowych. Nowe mechanizmy JDG są sprawdzane osobnym zestawem testów, bez tworzenia kolejnych kont produkcyjnych.
 
 [Raport prac](docs/STATUS.md) · [Wdrożenie](docs/WDROZENIE.md) · [Marka](docs/BRAND.md)
 
