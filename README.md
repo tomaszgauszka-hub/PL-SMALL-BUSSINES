@@ -1,76 +1,58 @@
 # Ewidora — Mały biznes. Jasne finanse.
 
-Polska aplikacja do ewidencji działalności nierejestrowanej: sprzedaż należna, wpłaty i zwroty, wydatki, baza klientów, prognoza PIT-36 oraz kontrola limitów. Własne konto email/hasło i prywatne dane dostępne z kilku urządzeń.
+Prywatna ewidencja działalności nierejestrowanej i jednoosobowej działalności gospodarczej. Logowanie email/hasło, klienci, katalog, faktury, koszty, płatności oraz automatyczne miesięczne i roczne zestawienia PIT/VAT. Dostęp z przeglądarki na kilku urządzeniach.
 
-## Docelowe zasoby
+Aplikacja: https://plsmallbusiness.vercel.app/
 
-| Zasób | Cel |
+## Funkcje
+
+- Wybór DN/JDG przy rejestracji i zapis typu w bazie. Kontrolowane przejście DN → JDG z datą, potwierdzeniem i zachowaniem historii.
+- Produkty i usługi: ceny netto, jednostki, VAT, stawka ryczałtu, archiwizacja, wyszukiwanie i CSV.
+- JDG: faktury sprzedaży i zakupów, wiele pozycji z katalogu, rabaty, ilości ułamkowe, szkice, automatyczne FV/FK, korekty i prywatny wydruk do PDF.
+- Niezmienne dokumenty po wystawieniu: zachowane ceny, dane kontrahenta i firmy. Korekty tworzą osobne dokumenty. Płatności i odwrócenia błędnych wpisów zachowują historię.
+- Osobne daty PIT, VAT, otrzymania dokumentu i płatności. Procent odliczenia VAT i udział kosztu PIT. Prywatne załączniki PDF/JPG/PNG do 4 MB.
+- JDG: miesięczna skala, liniowy i ryczałt; odliczenia faktycznie zapłaconych składek, VAT należny/naliczony, nadwyżka do przeniesienia lub zadeklarowanego zwrotu oraz ewidencja wpłat podatków.
+- Pulpit, wykresy i tabele, roczna prognoza, limit VAT z proporcją i wcześniejszą DN, próg skali, limit odliczenia zdrowotnej, kontrola prawa do ryczałtu według przychodu poprzedniego roku.
+- DN: odrębna ewidencja należności, kasowy PIT-36, kontrola miesięcznych limitów 2025 i kwartalnych 2026, zachowane przekroczenia i terminy CEIDG.
+- CSV dokumentów i podatków, wydruk rocznego raportu JDG, kopia JSON z dopisującym importem faktur, płatności, katalogu i ustawień rozliczeń. Pliki załączników pobiera się osobno.
+
+## Zakres rozliczeń
+
+Lata 2025–2026. Krajowe transakcje PLN i standardowe miesięczne rozliczenia; DN ze zwolnieniem VAT, JDG także z czynnym VAT. Daty rejestracji firmy mogą być wcześniejsze niż 2025 r. Formularze umożliwiają wskazanie właściwych okresów podatkowych; klasyfikacji czynności i prawa do ulg nie ustala sama nazwa produktu.
+
+Skala ma jedną kwotę wolną dla połączonych dochodów. Przy liniowym lub ryczałcie dochody DN i inne dochody na skali są prognozowane oddzielnie, bez kompensowania wpłat różnych zeznań. Roczne wyniki są prognozą indywidualną z zapisanych danych. Ustawienia podatku są odrębne dla każdego roku.
+
+Zakres nie obejmuje metod kasowych, rozliczeń kwartalnych, walut i zagranicy, remanentu, środków trwałych, płac, wszystkich ulg ani szczególnych procedur VAT. ZUS jest ewidencją zapłaconych składek, nie kalkulatorem należnych składek. Eksport jest materiałem pomocniczym, a nie kompletną formalną księgą. Aplikacja nie wysyła faktur do KSeF, deklaracji ani JPK.
+
+Reguły i źródła urzędowe zweryfikowano 16.10.2026. Szczegóły: [PLAN-JDG.md](docs/PLAN-JDG.md).
+
+## Architektura i wdrożenie
+
+| Zasób | Konfiguracja |
 | --- | --- |
 | GitHub | tomaszgauszka-hub/PL-SMALL-BUSSINES |
-| Vercel | plsmallbusiness — preset Next.js, Node.js 24 |
-| Supabase | TaskOn, ref booexvenlxuyrnamhsoi |
-| Tabele | 11 tabel public.mk_*; funkcje pomocnicze mk_private |
-| Pliki | Prywatny bucket mk-evidence, PDF/JPG/PNG do 4 MB przez API aplikacji |
+| Vercel | plsmallbusiness; preset Next.js, Node.js 24 |
+| Supabase | istniejący TaskOn, booexvenlxuyrnamhsoi |
+| Dane | 20 tabel public.mk_*, RLS, prywatne funkcje mk_private |
+| Pliki | prywatny bucket mk-evidence |
 
-## Stan na 16.10.2026
+Next.js 16, React 19, TypeScript, Supabase Auth i PostgreSQL. API używa JWT zalogowanego użytkownika i auth.uid(); nie korzysta z klucza service-role. Cookies HttpOnly/Secure/SameSite, brak publicznego cache dla danych prywatnych, kontrola Origin zapisów. Identyfikatory operacji, transakcje, niezmienność wystawionych dokumentów i wersjonowanie edytowalnych rekordów chronią pracę na kilku urządzeniach. Odświeżanie po zapisach, powrocie do karty i co 30 sekund.
 
-Migracja bazy została wykonana i zweryfikowana w TaskOn. Istniejących 20 tabel aplikacji TaskOn nie zmieniono. Każda z 11 nowych tabel ma RLS; funkcje działają jako SECURITY INVOKER z ustalonym search_path.
+Projekt współdzieli Supabase Auth z TaskOn. Istniejące konto TaskOn służy do logowania tym samym adresem. Globalny Site URL, SMTP, szablony email, 20 wcześniejszych tabel i pozostałe buckety TaskOn pozostają niezmienione. Preview Vercel jest chronione, produkcja publiczna; dane wymagają logowania.
 
-W rzeczywistym PostgreSQL sprawdzono izolację dwóch kont, ponowienie zapisu oraz prywatność metadanych plików. Cały test wycofano transakcją — nie pozostały konta ani dane testowe. Lokalnie przechodzi 35 testów i kompilacja produkcyjna.
+## Weryfikacja
 
-Aplikacja działa pod [plsmallbusiness.vercel.app](https://plsmallbusiness.vercel.app). Kod jest w repozytorium, Vercel buduje główną gałąź, a trzy publiczne zmienne Supabase zapisano wyłącznie dla produkcji. GitHub Actions poprawnie wykonuje kontrolę typów, 35 testów i kompilację.
-
-Konta są wspólne z TaskOn: osoba posiadająca tam konto powinna się zalogować tym samym emailem i hasłem. Ponowna rejestracja istniejącego adresu jest odrzucana przez Supabase. Ustawienia TaskOn pozwalają na nowe konta email i obecnie nie wymagają potwierdzenia email; aplikacja respektuje tę konfigurację.
-
-Zapisano dwa dokładne adresy powrotu Auth w TaskOn. Produkcyjny test HTTP objął dwie rzeczywiste rejestracje przez aplikację, logowanie, bezpieczne cookies, zapis klienta, sprzedaży, wpłaty i kosztu, ponowienie operacji, odczyt w drugiej sesji, izolację drugiego konta, ochronę Origin oraz wylogowanie. Test przeszedł. Oba konta techniczne wraz z ich wpisami usunięto; baza potwierdziła zero pozostałych kont testu.
-
-Identyfikacja Ewidora obejmuje nowy symbol, logotyp, favicon oraz interfejs w kolorach granatu i mięty. [Zasady marki i pochodzenie logotypu](docs/BRAND.md).
-
-Szczegóły i dalsze kroki: [WDROZENIE.md](docs/WDROZENIE.md). Raport wykonanych prac: [STATUS.md](docs/STATUS.md).
-
-## Architektura
-
-Next.js 16, React 19, TypeScript i Node.js 24. Logowanie, rejestracja, potwierdzenie email, odzyskiwanie hasła, ponowna wysyłka potwierdzenia i wylogowanie korzystają z Supabase Auth.
-
-API sprawdza użytkownika i wykonuje zapytania z jego JWT. Nie korzysta z klucza service-role. Sesja ma cookies HttpOnly, SameSite=Lax i Secure na produkcji. Dane prywatne nie trafiają do publicznego cache.
-
-Zapisy księgowe i numeracja są transakcyjne; identyfikator operacji zapobiega podwojeniu zapisu. Kontakty, profil i kontekst PIT mają kontrolę wersji. Aplikacja odświeża dane po zapisie, po powrocie do karty oraz co 30 sekund.
-
-Współdzielony projekt oznacza wspólny Supabase Auth. Dane finansowe są przypisane do auth.uid(), niezależnie od organizacji i uprawnień TaskOn. Nie wolno nadpisywać głównego Site URL, globalnych szablonów email ani konfiguracji Auth projektu TaskOn na potrzeby tego wdrożenia.
-
-## Sprawdzenie
-
-~~~sh
+```sh
 pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm test
 pnpm build
-~~~
+```
 
-Testy obejmują obliczenia, PostgreSQL/RLS dwóch kont w PGlite, atomowość i idempotencję, kontrolę wersji, import kopii, walidację żądań i ochronę plików przed szerokimi politykami innych aplikacji.
+70 testów: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych; nie pozostawiono danych testowych. Nowe mechanizmy JDG są sprawdzane osobnym zestawem testów, bez tworzenia kolejnych kont produkcyjnych.
 
-## Zakres podatkowy
-
-Obsługiwane są lata 2025–2026, sprzedaż krajowa w PLN i działalność ze zwolnieniem z VAT. Reguły oraz źródła urzędowe są dostępne w aplikacji i w lib/domain.ts. Przychód należny dla limitu jest oddzielony od faktycznie otrzymanego przychodu dla PIT.
-
-Raport PIT przygotowuje dane i prognozę podatku na skali. Aplikacja nie wysyła deklaracji do urzędu ani faktur do KSeF. Nie oblicza czynnego VAT, rozliczeń walutowych, wspólnego PIT ani wszystkich ulg.
-
-## Kopie danych
-
-Eksportuj → Kopia JSON zapisuje dane ewidencji. Import dopisuje brakujące identyfikatory, zachowuje historyczne dane dokumentów, przywraca kontekst PIT i przekroczenia oraz nie nadpisuje istniejących ustawień.
-
-Pliki dowodowe pobierz osobno i dodaj po imporcie w szczegółach wydatków. JSON nie zawiera bajtów załączników. Dawny audyt nie jest przedstawiany jako nowe operacje.
+[Raport prac](docs/STATUS.md) · [Wdrożenie](docs/WDROZENIE.md) · [Marka](docs/BRAND.md)
 
 ## Pochodzenie
 
-Implementacja jest własna. Inspiracje funkcjonalne: hipek/sales-registry, patimio66/mojmalybiznes i Pawel-04/Projekt_AI. Nie włączono ich kodu do projektu.
-
-## Rozbudowa o JDG i katalog — etap 1
-
-Dodano wybór DN/JDG przy rejestracji, osobny profil działalności, kontrolowane przejście DN → JDG i katalog produktów/usług z ceną netto, VAT, stawką ryczałtu, archiwizacją oraz kontrolą wersji. Katalog jest uwzględniany w kopii JSON i można go eksportować do CSV. Import nie zmienia rodzaju działalności konta.
-
-Nowa migracja: `20261016143642_business_profiles_and_catalog.sql`. Tabele `mk_business_profiles`, `mk_business_events` i `mk_products` mają RLS. Zapisane typy i katalog nie zmieniają wcześniejszych rozliczeń DN.
-
-**Księgowość JDG, faktury i automatyczne PIT/VAT nie są jeszcze gotowymi funkcjami.** Przygotowano plan, profil podatkowy i dokładny silnik kwot pozycji faktur. Zakres dalszych etapów, reguły i źródła: [PLAN-JDG.md](docs/PLAN-JDG.md). Obecna prognoza PIT pozostaje prognozą DN.
-
-44 testy obejmują też nowe RLS, przejście działalności, konflikty edycji, obliczenia pozycji faktur i błędy załączników.
+Implementacja własna. Inspiracje funkcjonalne: hipek/sales-registry, patimio66/mojmalybiznes i Pawel-04/Projekt_AI. Ich kodu nie włączono do projektu.

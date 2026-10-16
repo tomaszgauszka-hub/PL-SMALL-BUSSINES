@@ -14,11 +14,11 @@ export async function validateEvidence(file: File): Promise<void> {
   if (!evidenceMime(new Uint8Array(await file.slice(0, 8).arrayBuffer()))) throw new Error("Obsługiwane formaty to PDF, JPG i PNG.");
 }
 
-export async function uploadEvidence(expenseId: string, file: File, request: typeof fetch = fetch): Promise<void> {
+async function sendEvidence(target: "expenseId" | "invoiceId", id: string, file: File, request: typeof fetch): Promise<void> {
   await validateEvidence(file);
   const form = new FormData();
   form.set("file", file);
-  form.set("expenseId", expenseId);
+  form.set(target, id);
   let response: Response;
   try { response = await request("/api/files", { method: "POST", body: form, credentials: "same-origin" }); }
   catch { throw new Error("Przerwano wysyłanie załącznika. Sprawdź połączenie i spróbuj ponownie."); }
@@ -28,3 +28,5 @@ export async function uploadEvidence(expenseId: string, file: File, request: typ
     throw new Error(message || (response.status === 413 ? "Załącznik jest za duży. Wybierz plik do 4 MB." : "Nie udało się zapisać załącznika. Spróbuj ponownie."));
   }
 }
+export function uploadEvidence(expenseId: string, file: File, request: typeof fetch = fetch) { return sendEvidence("expenseId", expenseId, file, request); }
+export function uploadInvoiceEvidence(invoiceId: string, file: File, request: typeof fetch = fetch) { return sendEvidence("invoiceId", invoiceId, file, request); }

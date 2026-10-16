@@ -11,7 +11,7 @@ export type State = { clients: Client[]; sales: Sale[]; payments: Payment[]; exp
 
 export const defaultSettings: Settings = { sellerName: "", sellerAddress: "", sellerNip: "", sellerEmail: "", startDate: "", eligible60: false, regulated: false, specialVat: false, specialCash: false, version: 0 };
 export function emptyState(): State { return { clients: [], sales: [], payments: [], expenses: [], attachments: [], audit: [], settings: { ...defaultSettings }, tax: [], legalEvents: [] }; }
-export const CHECKED_DATE = "2026-10-15";
+export const CHECKED_DATE = "2026-10-16";
 export const SOURCES = [
   { title: "Działalność nierejestrowana — zasady i limity", url: "https://www.podatki.gov.pl/poradniki-i-informatory/dzialalnosc-nierejestrowana" },
   { title: "PIT: przychody, koszty i rozliczenie roczne", url: "https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-dzialalnosci-nierejestrowanej" },
@@ -27,7 +27,7 @@ export function parseMoney(input: unknown): number {
 }
 export function decimal(value: number): string { return (value / 100).toFixed(2); }
 export function today(): string { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date()); }
-export function validDate(input: unknown): input is string { if (typeof input !== "string" || !/^20\d{2}-\d{2}-\d{2}$/.test(input)) return false; const d = new Date(input + "T12:00:00Z"); return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === input; }
+export function validDate(input: unknown): input is string { if (typeof input !== "string" || !/^(19|20)\d{2}-\d{2}-\d{2}$/.test(input)) return false; const d = new Date(input + "T12:00:00Z"); return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === input; }
 export function dateLabel(value: string): string { return value ? value.split("-").reverse().join(".") : "—"; }
 export function periodRule(year: number) { if (year === 2025) return { limit: 349950, periods: 12, label: "miesiąc", short: "M" }; if (year === 2026) return { limit: 1081350, periods: 4, label: "kwartał", short: "Q" }; return null; }
 export function periodNumber(date: string, year: number): number { return year === 2025 ? Number(date.slice(5, 7)) : Math.ceil(Number(date.slice(5, 7)) / 3); }
@@ -68,6 +68,7 @@ function polishHolidays(year: number): Set<string> {
   const holidays = new Set(["01-01", "01-06", "05-01", "05-03", "08-15", "11-01", "11-11", "12-25", "12-26", ...(year >= 2025 ? ["12-24"] : [])].map(md => `${year}-${md}`));
   for (const offset of [0, 1, 49, 60]) { const date = new Date(Date.UTC(year, month - 1, day + offset, 12)); holidays.add(date.toISOString().slice(0, 10)); } return holidays;
 }
+export function nextBusinessDate(value: string): string { const d = new Date(value + "T12:00:00Z"); while ([0, 6].includes(d.getUTCDay()) || polishHolidays(d.getUTCFullYear()).has(d.toISOString().slice(0, 10))) d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); }
 export function ceidgDeadline(breachDate: string): string { const d = new Date(breachDate + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + 7); while ([0, 6].includes(d.getUTCDay()) || polishHolidays(d.getUTCFullYear()).has(d.toISOString().slice(0, 10))) d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); }
 export function csvCell(value: unknown): string { const text = String(value ?? ""); const clean = text.trimStart(); const unsafe = /^[=+@]/.test(clean) || (clean.startsWith("-") && !/^-\d+([.,]\d+)?$/.test(clean)) || /^[\t\r\n]/.test(text); return '"' + (unsafe ? "'" : "") + text.replace(/"/g, '""') + '"'; }
 export function toCsv(rows: unknown[][]): string { return "\ufeff" + rows.map(row => row.map(csvCell).join(";")).join("\r\n"); }
