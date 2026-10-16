@@ -17,6 +17,7 @@ export default function AuthForm({ configured, recovery = false, linkError = fal
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(linkError ? "Link wygasł albo został już użyty. Poproś o nowy." : "");
   const [message, setMessage] = useState("");
+  const [businessType, setBusinessType] = useState<"dn" | "jdg">("dn");
   function changeMode(next: Mode) { setMode(next); setMessage(""); setError(""); }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -28,7 +29,7 @@ export default function AuthForm({ configured, recovery = false, linkError = fal
       setError("Hasła nie są takie same."); setBusy(false); return;
     }
     try {
-      const response = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: mode, ...(mode !== "password" ? { email: form.get("email") } : {}), password }) });
+      const response = await fetch("/api/auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: mode, ...(mode !== "password" ? { email: form.get("email") } : {}), ...(mode === "signup" ? { businessType } : {}), password }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Usługa jest chwilowo niedostępna.");
       if (mode === "login" || mode === "password" || (mode === "signup" && !result.confirmation)) window.location.assign("/");
@@ -55,6 +56,7 @@ export default function AuthForm({ configured, recovery = false, linkError = fal
         {!configured && <div className="notice amber"><span>Logowanie nie jest jeszcze uruchomione w tym wdrożeniu.</span></div>}
         {message && <div className="notice info" role="status"><CheckCircle2 size={18} /><span>{message}</span></div>}
         <form onSubmit={submit} key={mode} aria-busy={busy}>
+          {mode === "signup" && <fieldset className="business-choice"><legend>Jaką działalność prowadzisz?</legend><label className={businessType === "dn" ? "selected" : ""}><input type="radio" name="businessType" value="dn" checked={businessType === "dn"} onChange={() => setBusinessType("dn")} /><span><strong>Nierejestrowana</strong><small>Ewidencja sprzedaży, wydatków i limitu DN</small></span></label><label className={businessType === "jdg" ? "selected" : ""}><input type="radio" name="businessType" value="jdg" checked={businessType === "jdg"} onChange={() => setBusinessType("jdg")} /><span><strong>Jednoosobowa działalność gospodarcza</strong><small>Profil podatkowy JDG i katalog produktów / usług</small></span></label><p>W przyszłości możesz przejść z DN na JDG z zachowaniem historii.</p></fieldset>}
           {mode !== "password" && <label className="field"><span>Adres email</span><input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="ty@przyklad.pl" /></label>}
           {["login", "signup", "password"].includes(mode) && <label className="field"><span>Hasło</span><input name="password" type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} required minLength={mode === "login" ? 1 : 12} maxLength={256} placeholder={mode === "login" ? "Twoje hasło" : "Co najmniej 12 znaków"} /></label>}
           {["signup", "password"].includes(mode) && <label className="field"><span>Powtórz hasło</span><input name="confirm" type="password" autoComplete="new-password" required minLength={12} maxLength={256} /></label>}
