@@ -66,3 +66,19 @@ Pulpit i widok PIT/VAT obejmują miesięczną skalę, liniowy i ryczałt, faktyc
 Nowe 6 tabel JDG wraz z poprzednimi 14 tabelami Ewidory daje 20 tabel mk_*; każda ma RLS. Zakres jest opisany w PLAN-JDG.md i w interfejsie. KSeF/JPK, metody kasowe, zagranica, remanent, środki trwałe i płace pozostają poza zakresem.
 
 Migracje produkcyjne zastosowano i sprawdzono w Supabase: `20261016175643_ewidora_invoices_and_payments.sql` oraz `20261016175703_ewidora_jdg_tax_periods.sql`. Wszystkie 20 tabel mk_* ma RLS; nowe RPC działają jako SECURITY INVOKER z ustalonym search_path. Doradca bezpieczeństwa nie zgłosił nowych obiektów Ewidory. Istniejąca konfiguracja TaskOn pozostała niezmieniona.
+
+
+## Remanent KPiR i uprawnienia — 16.10.2026
+
+Dodano prywatne spisy początkowe, miesięczne i końcowe z wyceną własnych składników oraz ilościowym ujęciem towarów obcych. Szkice mają wersjonowanie; zatwierdzone zapisy są niezmienne. Poprawka jest pełną wersją z przyczyną i historią. Wydruk do podpisu, CSV, kopia i import JSON zachowują utrwalone dane firmy. Katalog przenosi tylko nazwę/jednostkę. Wycenę, niższą cenę rynkową, koszt materiałów bezpośrednich i ustawowe pomniejszenia sprawdza również baza.
+
+Różnica remanentowa koryguje roczny dochód skali/liniowego i zaliczkę za miesiąc rzeczywistego spisu. Nie jest przenoszona jako fikcyjny spis następnych miesięcy. Brak początku przy zatwierdzonym końcu blokuje właściwy wynik PIT; niepełny rok ma widoczną informację o niepełnej prognozie. VAT i ryczałt pozostają bez wpływu remanentu.
+
+84 testy przechodzą, w tym 14 testów remanentu i uprawnień. TypeScript i build produkcyjny są poprawne. Testowa baza odtwarza teraz domyślne szerokie granty Supabase: sama kontrola RLS nie oznacza zakazu kasowania własnej historii. Zastosowano jawne uprawnienia do obiektów Ewidory. Produkcja potwierdziła 21 tabel mk_* z RLS, brak dostępu SELECT anon oraz brak DELETE/TRUNCATE authenticated na każdej z nich. Płatności faktur i historia przejść nie mają prawa UPDATE. Istniejących obiektów i globalnej konfiguracji TaskOn nie zmieniono.
+
+Migracje zastosowane i potwierdzone przez Supabase:
+- `20261016204716_inventory_counts.sql`
+- `20261016204806_inventory_permissions.sql`
+- `20261016204912_ewidora_explicit_privileges.sql`
+
+Nie tworzono kont technicznych ani wpisów księgowych w produkcji. Pozostały zakres: środki trwałe, formalne struktury KPiR/JPK i szczególne procedury. Moduł nie obejmuje remanentu likwidacyjnego VAT.

@@ -11,7 +11,7 @@ Plan i weryfikacja źródeł: 16.10.2026. To rozszerzenie aplikacji DN, z zachow
 | 3. Podatki i wykresy | Skala, liniowy i ryczałt; VAT należny/naliczony; zaliczki i zapłaty; historia miesięcy, limity, eksport | Testy granic, zaokrągleń, przenoszenia VAT, wielu stawek ryczałtu i oddzielenia DN/JDG |
 | 4. Rozszerzenia i audyt | Formalne eksporty ewidencji, remanent, środki trwałe, szczególne przypadki | Osobna weryfikacja przepisów i przypadków przed włączeniem każdej funkcji |
 
-Etapy 1–3 zaimplementowano. Stare wpisy DN nie są przeliczane jako dokumenty JDG; do wspólnego rocznego rozliczenia na skali trafia właściwy dochód DN. Rozszerzenia z etapu 4 pozostają osobnym zakresem.
+Etapy 1–3 zaimplementowano. Stare wpisy DN nie są przeliczane jako dokumenty JDG; do wspólnego rocznego rozliczenia na skali trafia właściwy dochód DN. Z etapu 4 dodano remanent KPiR. Pozostałe rozszerzenia pozostają osobnym zakresem.
 
 ## Decyzje modelu
 
@@ -65,10 +65,28 @@ Kalkulator obejmuje krajowe transakcje PLN, ogólne zasady momentu powstania prz
 
 ## Bieżący zakres kodu
 
-Etapy 1–3: katalog i profil, faktury, płatności/odwrócenia, korekty, wydruk oraz miesięczne i roczne PIT/VAT z wykresami i tabelami. 70 testów, w tym PostgreSQL/PGlite i dwa konta. Osobne tabele rocznych założeń oraz miesięcznych składek/wpłat mają RLS i wersjonowanie. Kopia przywraca dokumenty z historycznymi danymi oraz odpowiednio przesuwa numerację; nie nadpisuje istniejących rekordów ani typu działalności.
+Etapy 1–3: katalog i profil, faktury, płatności/odwrócenia, korekty, wydruk oraz miesięczne i roczne PIT/VAT z wykresami i tabelami. 84 testy, w tym PostgreSQL/PGlite i dwa konta. Osobne tabele rocznych założeń oraz miesięcznych składek/wpłat mają RLS i wersjonowanie. Kopia przywraca dokumenty z historycznymi danymi oraz odpowiednio przesuwa numerację; nie nadpisuje istniejących rekordów ani typu działalności.
 
 Przyjęto zaliczki miesięczne bez opcjonalnego odraczania małych kwot. Wcześniejsze zaliczki należne są oddzielone od faktycznie zapłaconych, więc zaległość nie jest ponownie doliczana w następnym miesiącu. VAT sumuje się według pól stawek, a następnie zaokrągla do pełnych złotych. Nadwyżka przechodzi pomiędzy miesiącami po odjęciu części zadeklarowanej do zwrotu.
 
 Limit ryczałtu w 2026 r. to 8 517 200 zł przychodu w 2025 r., a w 2025 r. 8 569 200 zł przychodu w 2024 r. Nie jest to limit bieżącej sprzedaży. Kalkulator nie kwalifikuje działalności do stawki na podstawie nazwy pozycji. Ujemne podstawy wymagające ustalenia korekty i nieprawidłowe ujęcie zdrowotnej blokują prezentowanie PIT jako gotowego wyniku.
 
-Dalszy etap 4 obejmuje remanent, środki trwałe, formalne struktury ewidencji/JPK i szczególne procedury. Są jawnie poza bieżącym zakresem.
+Dalszy etap 4 obejmuje środki trwałe, formalne struktury ewidencji/JPK i szczególne procedury. Są jawnie poza bieżącym zakresem.
+
+
+## Remanent KPiR — zaimplementowane rozszerzenie
+
+Spisy początkowe (1 stycznia lub początek JDG), miesięczne (styczeń–listopad) i końcowe (31 grudnia) w latach 2025–2026. Szkice są wersjonowane; zatwierdzone zapisy i dane firmy są niezmienne. Poprawka zawiera pełną nową wersję, przyczynę i odwołanie do poprzedniej; tylko najnowsza zatwierdzona wersja wpływa na PIT. Konflikt równoległych poprawek jest odrzucany. Puste spisy wymagają potwierdzenia stanu zerowego.
+
+Ilość do trzech miejsc, cena w groszach, sumowanie z kontrolą zakresu także w PostgreSQL. Towary/materiały: zakup/nabycie lub niższa cena rynkowa z ceną pierwotną i uzasadnieniem. Produkcja/wyroby: koszt wytworzenia i właściwa obniżona wycena; produkcja w toku nie poniżej podanego kosztu materiałów bezpośrednich. Odpady według przydatności. Towary obce bez wartości, z nazwą właściciela; własne poza firmą z lokalizacją. Katalog przenosi nazwę/jednostkę, nigdy cenę sprzedaży jako wycenę zapasu. Cena obejmuje tylko nieodliczany VAT. Ustawowe pomniejszenie wartości wymaga osobnej kwoty i uzasadnienia.
+
+PIT skali/liniowego: dochód roczny = przychód − koszty + remanent końcowy − początkowy (art. 24 ust. 2). Miesięczna zaliczka uwzględnia różnicę wobec spisu początkowego tylko dla faktycznego spisu na koniec tego miesiąca (art. 44 ust. 2); nie przenosimy oszacowania na następne miesiące. Brak początku przy zatwierdzonym końcu blokuje wynik właściwego PIT; brak pełnych spisów rocznych oznacza niepełną prognozę. Spis z 31 grudnia poprzedniego roku może zastąpić początek tylko przy wcześniejszym rozpoczęciu JDG. Ryczałt i VAT nie są korygowane remanentem.
+
+Wydruk ma dane firmy, datę, pozycje, ilość/cenę/wartość, sumę, końcową klauzulę oraz miejsce na podpis. Zatwierdzenie zapisu nie jest podpisem dokumentu. Kopia JSON zachowuje pełną historię i utrwalone dane; import odtwarza rodziców przed poprawkami i nie duplikuje identyfikatorów. Osobne API i tabela `mk_inventories` z RLS, SECURITY INVOKER oraz prywatnym cache.
+
+Poza zakresem: spis przy likwidacji i zmianach wspólników, VAT likwidacyjny, specjalne branżowe metody wyceny, pełna formalna KPiR/JPK. Wyceny nie ustalamy automatycznie z cen sprzedaży; użytkownik wprowadza właściwe wartości i wykonuje wymagany spis oraz podpis.
+
+Podstawy, sprawdzone 16.10.2026:
+- Rozporządzenie z 6.09.2025, Dz.U. 2025 poz. 1299, § 20–22 (od 1.01.2026): https://eli.gov.pl/api/acts/DU/2025/1299/text.pdf
+- PIT, tekst jednolity Dz.U. 2026 poz. 592 ze zmianami, art. 24 ust. 2 i art. 44 ust. 2: https://eli.gov.pl/api/acts/DU/2026/592/text/U/D20260592Lj.pdf
+- Rozporządzenie KPiR dla 2025, Dz.U. 2019 poz. 2544 ze zmianami, § 24–26: https://eli.gov.pl/api/acts/DU/2019/2544/text.pdf
