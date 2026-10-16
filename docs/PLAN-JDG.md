@@ -11,7 +11,7 @@ Plan i weryfikacja źródeł: 16.10.2026. To rozszerzenie aplikacji DN, z zachow
 | 3. Podatki i wykresy | Skala, liniowy i ryczałt; VAT należny/naliczony; zaliczki i zapłaty; historia miesięcy, limity, eksport | Testy granic, zaokrągleń, przenoszenia VAT, wielu stawek ryczałtu i oddzielenia DN/JDG |
 | 4. Rozszerzenia i audyt | Formalne eksporty ewidencji, remanent, środki trwałe, szczególne przypadki | Osobna weryfikacja przepisów i przypadków przed włączeniem każdej funkcji |
 
-Pierwszy etap nie jest deklarowany jako gotowa księgowość JDG. Samo zapisanie formy PIT i statusu VAT nie uruchamia naliczania podatków od starych wpisów DN.
+Etapy 1–3 zaimplementowano. Stare wpisy DN nie są przeliczane jako dokumenty JDG; do wspólnego rocznego rozliczenia na skali trafia właściwy dochód DN. Rozszerzenia z etapu 4 pozostają osobnym zakresem.
 
 ## Decyzje modelu
 
@@ -23,17 +23,17 @@ Pierwszy etap nie jest deklarowany jako gotowa księgowość JDG. Samo zapisanie
 - Zmiana DN → JDG wymaga daty i świadomego potwierdzenia. Nie cofamy jej jednym przełącznikiem. Wpisy DN kolidujące z datą przejścia wymagają wyjaśnienia; nie są automatycznie przekształcane.
 - Wszystkie nowe tabele mają RLS, ustalone uprawnienia i indeks właściciela. Zapisy mają identyfikatory operacji, ochronę przed powieleniem i konfliktami wersji.
 
-## Faktury — implementacja kolejnego etapu
+## Faktury — zaimplementowane
 
 Osobne tabele `mk_invoices`, `mk_invoice_payments`, `mk_invoice_sequences`. Nagłówek: kierunek sprzedaż/zakup, rodzaj zwykła/korekta, numer, daty wystawienia/dostawy/PIT/VAT/otrzymania dokumentu, kontrahent i jego utrwalone dane, waluta PLN, termin płatności, status, dokument źródłowy i przyczyna korekty.
 
-Pozycje: nazwa, jednostka, ilość do trzech miejsc, cena jednostkowa w groszach, rabat, stawka VAT i ryczałtu, netto/VAT/brutto. Obliczenia całkowitoliczbowe `BigInt`; kopia wyliczeń także w PostgreSQL. Dokument wystawiony nie może być po cichu nadpisany ani usunięty. Korekta tworzy nowy dokument. PDF zawiera wymagane dane sprzedawcy/nabywcy i podsumowania stawek. KSeF pozostaje poza zakresem.
+Pozycje: nazwa, jednostka, ilość do trzech miejsc, cena jednostkowa w groszach, rabat, stawka VAT i ryczałtu, netto/VAT/brutto. Obliczenia całkowitoliczbowe `BigInt`; kopia wyliczeń także w PostgreSQL. Dokument wystawiony nie może być po cichu nadpisany ani usunięty. Korekta tworzy nowy dokument. Wydruk do PDF zawiera dane sprzedawcy/nabywcy, daty, pozycje, podsumowania stawek i właściwe oznaczenia. Zakupy są wydrukiem ewidencji, nie kopią oryginalnej faktury dostawcy. KSeF pozostaje poza zakresem.
 
-Zakup: data otrzymania, moment prawa do odliczenia VAT, procent odliczenia VAT, koszt PIT i kategoria ewidencji. Nie utożsamiamy daty zapłaty z datą ujęcia kosztu JDG. Podgląd przed zatwierdzeniem pokaże kwoty i właściwy okres.
+Zakup: data otrzymania, moment prawa do odliczenia VAT, procent odliczenia VAT, koszt PIT i kategoria ewidencji. Nie utożsamiamy daty zapłaty z datą ujęcia kosztu JDG. Podgląd przed zatwierdzeniem pokazuje kwoty i właściwy okres.
 
 ## Podatki — reguły i granice
 
-Początkowy kalkulator obejmie krajowe transakcje PLN, ogólne zasady momentu powstania przychodu i VAT, miesięczne rozliczenia. Każdy inny zakres będzie jawnie oznaczony i wdrażany oddzielnie; nie wolno wyświetlać obliczenia jako kompletnego, gdy brakuje wymaganej klasyfikacji albo danych.
+Kalkulator obejmuje krajowe transakcje PLN, ogólne zasady momentu powstania przychodu i VAT, miesięczne rozliczenia. Każdy inny zakres będzie jawnie oznaczony i wdrażany oddzielnie; nie wolno wyświetlać obliczenia jako kompletnego, gdy brakuje wymaganej klasyfikacji albo danych.
 
 - Skala: 12%/32%, próg 120 000 zł i wspólna kwota wolna. Zaliczka JDG i rozliczenie roczne z pozostałymi dochodami to osobne obliczenia.
 - Liniowy: 19%, bez kwoty wolnej; zapłacona składka zdrowotna odliczana tylko raz i w 2026 do 14 100 zł, z uwzględnieniem części już w kosztach.
@@ -51,7 +51,7 @@ Początkowy kalkulator obejmie krajowe transakcje PLN, ogólne zasady momentu po
 2. Przejście DN → JDG: granica dat, stare wpłaty po przejściu, korekty, kolizje wpisów i zachowanie klientów.
 3. Katalog: dwa konta, konflikt wersji, archiwizacja, brak zmiany cen na historycznych dokumentach.
 4. Faktury: wiele stawek, rabat, ilości ułamkowe, kwoty graniczne, unikalna numeracja, transakcja i ponowienie zapisu.
-5. PIT/VAT: granice progów, podstawy i podatek zaokrąglane we właściwym miejscu; zwroty/korekkty; roczne narastanie i zapłacone zaliczki; VAT do przeniesienia; brak podwójnego ujęcia kosztu i składki.
+5. PIT/VAT: granice progów, podstawy i podatek zaokrąglane we właściwym miejscu; zwroty/korekty; roczne narastanie i zapłacone zaliczki; VAT do przeniesienia; brak podwójnego ujęcia kosztu i składki.
 
 ## Źródła urzędowe
 
@@ -65,4 +65,10 @@ Początkowy kalkulator obejmie krajowe transakcje PLN, ogólne zasady momentu po
 
 ## Bieżący zakres kodu
 
-Etap 1 oraz dokładny silnik obliczeń pozycji faktur. Etapy 2–4 pozostają planem, dopóki odpowiadające im funkcje i testy nie zostaną ukończone. W interfejsie JDG nie wolno prezentować prognozy DN jako należnego PIT/VAT przedsiębiorcy.
+Etapy 1–3: katalog i profil, faktury, płatności/odwrócenia, korekty, wydruk oraz miesięczne i roczne PIT/VAT z wykresami i tabelami. 70 testów, w tym PostgreSQL/PGlite i dwa konta. Osobne tabele rocznych założeń oraz miesięcznych składek/wpłat mają RLS i wersjonowanie. Kopia przywraca dokumenty z historycznymi danymi oraz odpowiednio przesuwa numerację; nie nadpisuje istniejących rekordów ani typu działalności.
+
+Przyjęto zaliczki miesięczne bez opcjonalnego odraczania małych kwot. Wcześniejsze zaliczki należne są oddzielone od faktycznie zapłaconych, więc zaległość nie jest ponownie doliczana w następnym miesiącu. VAT sumuje się według pól stawek, a następnie zaokrągla do pełnych złotych. Nadwyżka przechodzi pomiędzy miesiącami po odjęciu części zadeklarowanej do zwrotu.
+
+Limit ryczałtu w 2026 r. to 8 517 200 zł przychodu w 2025 r., a w 2025 r. 8 569 200 zł przychodu w 2024 r. Nie jest to limit bieżącej sprzedaży. Kalkulator nie kwalifikuje działalności do stawki na podstawie nazwy pozycji. Ujemne podstawy wymagające ustalenia korekty i nieprawidłowe ujęcie zdrowotnej blokują prezentowanie PIT jako gotowego wyniku.
+
+Dalszy etap 4 obejmuje remanent, środki trwałe, formalne struktury ewidencji/JPK i szczególne procedury. Są jawnie poza bieżącym zakresem.

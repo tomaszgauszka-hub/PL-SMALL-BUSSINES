@@ -48,8 +48,21 @@ Te wyniki nie są potwierdzeniem poprawności zabezpieczeń całego TaskOn. Nie 
 
 Zaimplementowano pierwszy etap planu `PLAN-JDG.md`: wybór przy rejestracji, profil w bazie, przejście DN → JDG z historią, katalog produktów/usług, ceny/stawki, archiwizację i eksport. Wersjonowanie i identyfikatory operacji chronią zapis z wielu urządzeń. Osobny silnik oblicza pozycje faktur w całkowitych groszach.
 
-Księgowość JDG, wystawianie faktur i automatyczne rozliczenia PIT/VAT pozostają kolejnym etapem. Obecna ewidencja DN nie może być używana zamiast ewidencji JDG.
+Na tym etapie zakończono katalog i profile. Rozbudowę o faktury i podatki opisano w kolejnym wpisie poniżej; ewidencja DN pozostaje odrębna.
 
 44 testy oraz kontrola TypeScript przechodzą. Dostosowano API załączników do 4 MB, dodano walidację przed zapisem wydatku i czytelne ponawianie samego załącznika. Okna blokują przewijanie strony w tle; menu mobilne ma zamykanie, obsługę Escape i kontrolę fokusu.
 
 Migrację zastosowano w TaskOn jako `20261016143642_business_profiles_and_catalog.sql`. Baza potwierdziła RLS na wszystkich trzech nowych tabelach; doradca bezpieczeństwa nie wskazał problemów dotyczących tych obiektów. Plik migracji dopasowano do wersji potwierdzonej przez Supabase.
+
+
+## Rozbudowa JDG — faktury i podatki, 16.10.2026
+
+Zaimplementowano faktury sprzedaży/zakupu, szkice, wielopozycyjne dokumenty z katalogu, rabaty, korekty, niezmienne dane firmy i kontrahenta, płatności z odwróceniami, załączniki oraz prywatny wydruk do PDF. Zakup ma oddzielne okresy PIT/VAT, procent odliczenia VAT i udział kosztu. Import kopii dopisuje dokumenty, ich płatności i dane rozliczeń, zachowuje historię oraz przesuwa numerację.
+
+Pulpit i widok PIT/VAT obejmują miesięczną skalę, liniowy i ryczałt, faktycznie zapłacone składki, roczną prognozę z odrębnym rozliczeniem innych dochodów na skali, VAT do zapłaty/przeniesienia/zwrotu oraz wykresy i dokładne tabele. Kontrola limitu VAT uwzględnia proporcję od pierwszego dnia sprzedaży i wcześniejszą DN. Prawo do ryczałtu badane według przychodu poprzedniego roku.
+
+70 testów przeszło, w tym testy nowych migracji w PostgreSQL/PGlite, prywatność dwóch kont, idempotencja, wersjonowanie, korekty, import, składki, zaokrąglenia oraz zaliczki niezależne od faktycznych wpłat. Kompilacja produkcyjna sprawdza również nowe trasy. Nie tworzono nowych kont technicznych w produkcji.
+
+Nowe 6 tabel JDG wraz z poprzednimi 14 tabelami Ewidory daje 20 tabel mk_*; każda ma RLS. Zakres jest opisany w PLAN-JDG.md i w interfejsie. KSeF/JPK, metody kasowe, zagranica, remanent, środki trwałe i płace pozostają poza zakresem.
+
+Migracje produkcyjne zastosowano i sprawdzono w Supabase: `20261016175643_ewidora_invoices_and_payments.sql` oraz `20261016175703_ewidora_jdg_tax_periods.sql`. Wszystkie 20 tabel mk_* ma RLS; nowe RPC działają jako SECURITY INVOKER z ustalonym search_path. Doradca bezpieczeństwa nie zgłosił nowych obiektów Ewidory. Istniejąca konfiguracja TaskOn pozostała niezmieniona.
