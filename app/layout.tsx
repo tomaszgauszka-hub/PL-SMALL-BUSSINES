@@ -5,11 +5,11 @@ export const viewport = { width: "device-width", initialScale: 1, themeColor: "#
 
 export const metadata: Metadata = {
   title: "Ewidora — Mały biznes. Jasne finanse.",
-  description: "Sprzedaż, wydatki, klienci i podsumowanie PIT-36. Prosta ewidencja działalności nierejestrowanej, dostępna na każdym urządzeniu.",
+  description: "Działalność nierejestrowana i JDG: faktury, produkty, koszty, klienci oraz automatyczne PIT i VAT. Prywatna ewidencja dostępna na każdym urządzeniu.",
   applicationName: "Ewidora",
   openGraph: {
     title: "Ewidora — Mały biznes. Jasne finanse.",
-    description: "Przychody, wydatki, klienci i PIT-36. Twoja działalność nierejestrowana pod kontrolą.",
+    description: "Faktury, produkty, koszty, klienci i podatki. Twoja DN lub JDG pod kontrolą.",
     locale: "pl_PL",
     type: "website",
   },
