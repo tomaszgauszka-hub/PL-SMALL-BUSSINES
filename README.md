@@ -1,4 +1,4 @@
-# Mała Księga — PL SMALL BUSSINES
+# Ewidora — Mały biznes. Jasne finanse.
 
 Polska aplikacja do ewidencji działalności nierejestrowanej: sprzedaż należna, wpłaty i zwroty, wydatki, baza klientów, prognoza PIT-36 oraz kontrola limitów. Własne konto email/hasło i prywatne dane dostępne z kilku urządzeń.
 
@@ -22,7 +22,9 @@ Aplikacja działa pod [plsmallbusiness.vercel.app](https://plsmallbusiness.verce
 
 Konta są wspólne z TaskOn: osoba posiadająca tam konto powinna się zalogować tym samym emailem i hasłem. Ponowna rejestracja istniejącego adresu jest odrzucana przez Supabase. Ustawienia TaskOn pozwalają na nowe konta email i obecnie nie wymagają potwierdzenia email; aplikacja respektuje tę konfigurację.
 
-Pozostało zatwierdzenie dwóch dokładnych adresów powrotu Auth w panelu TaskOn, potrzebnych między innymi do odzyskiwania hasła. Pełny test prywatnej sesji i zapisu na produkcji pozostaje do wykonania na uprawnionym koncie.
+Zapisano dwa dokładne adresy powrotu Auth w TaskOn. Produkcyjny test HTTP objął dwie rzeczywiste rejestracje przez aplikację, logowanie, bezpieczne cookies, zapis klienta, sprzedaży, wpłaty i kosztu, ponowienie operacji, odczyt w drugiej sesji, izolację drugiego konta, ochronę Origin oraz wylogowanie. Test przeszedł. Oba konta techniczne wraz z ich wpisami usunięto; baza potwierdziła zero pozostałych kont testu.
+
+Identyfikacja Ewidora obejmuje nowy symbol, logotyp, favicon oraz interfejs w kolorach granatu i mięty. [Zasady marki i pochodzenie logotypu](docs/BRAND.md).
 
 Szczegóły i dalsze kroki: [WDROZENIE.md](docs/WDROZENIE.md). Raport wykonanych prac: [STATUS.md](docs/STATUS.md).
 
