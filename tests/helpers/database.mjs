@@ -10,7 +10,8 @@ export async function applicationDatabase() {
  create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text);
  alter table storage.objects enable row level security;grant select,insert,delete on storage.objects to authenticated;
  create function storage.foldername(p text) returns text[] language sql immutable as $$select string_to_array(p,'/')$$;
- grant usage on schema auth,storage,public to authenticated,anon;`);
+ grant usage on schema auth,storage,public to authenticated,anon;
+ alter default privileges in schema public grant all on tables to authenticated,anon;`);
  const directory=new URL('../../supabase/migrations/',import.meta.url);
  for(const file of readdirSync(directory).filter(file=>file.endsWith('.sql')).sort()) await db.exec(readFileSync(new URL(file,directory),'utf8'));
  return db;
