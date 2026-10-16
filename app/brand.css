@@ -183,3 +183,29 @@
   .auth-card h2 { font-size: 25px; }
   .auth-story h1 { font-size: 35px; }
 }
+
+/* Catalog, business choice and mobile overlay controls. */
+.sidebar-mobile-header { display:none; }
+.business-choice { border:0; padding:0; margin:0; min-width:0; }
+.business-choice legend { font-size:13px; font-weight:650; color:var(--ink); margin-bottom:10px; }
+.business-choice label { display:flex; gap:10px; align-items:flex-start; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:9px; cursor:pointer; }
+.business-choice label.selected { border-color:var(--green); background:#effaf6; }
+.business-choice input { accent-color:var(--green); margin-top:4px; flex-shrink:0; }
+.business-choice strong { font-size:12px; display:block; color:var(--ink); }
+.business-choice small,.business-choice p { display:block; color:var(--muted); font-size:11px; line-height:1.6; }
+.business-choice p { margin-top:6px; }
+.catalog-actions { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.catalog-actions p { flex:1 1 300px; font-size:12px; }
+.modal { overscroll-behavior:contain; }
+@media screen and (max-width:1050px) {
+ .sidebar { overflow-y:auto; overscroll-behavior:contain; height:100dvh; }
+ .sidebar>* { flex-shrink:0; }
+ .sidebar:not(.is-open) { visibility:hidden; }
+ .sidebar-mobile-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; color:var(--muted); font-size:11px; }
+ .sidebar-mobile-header .icon-btn { min-width:44px; min-height:44px; }
+}
+@media screen and (max-width:760px) {
+ .catalog-actions .btn { flex:1; min-height:44px; }
+ .catalog-actions p { flex-basis:100%; }
+ .business-choice label { min-height:54px; }
+}

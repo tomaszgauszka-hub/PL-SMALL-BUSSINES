@@ -43,3 +43,13 @@ W projekcie TaskOn istniały wcześniej ostrzeżenia, które pozostały poza zak
 | Ochrona przed ujawnionymi hasłami wyłączona | 1 | [Opis](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection) |
 
 Te wyniki nie są potwierdzeniem poprawności zabezpieczeń całego TaskOn. Nie zmieniano istniejących widoków, funkcji, polityk ani globalnych ustawień Auth.
+
+## Rozbudowa — katalog i profil JDG
+
+Zaimplementowano pierwszy etap planu `PLAN-JDG.md`: wybór przy rejestracji, profil w bazie, przejście DN → JDG z historią, katalog produktów/usług, ceny/stawki, archiwizację i eksport. Wersjonowanie i identyfikatory operacji chronią zapis z wielu urządzeń. Osobny silnik oblicza pozycje faktur w całkowitych groszach.
+
+Księgowość JDG, wystawianie faktur i automatyczne rozliczenia PIT/VAT pozostają kolejnym etapem. Obecna ewidencja DN nie może być używana zamiast ewidencji JDG.
+
+44 testy oraz kontrola TypeScript przechodzą. Dostosowano API załączników do 4 MB, dodano walidację przed zapisem wydatku i czytelne ponawianie samego załącznika. Okna blokują przewijanie strony w tle; menu mobilne ma zamykanie, obsługę Escape i kontrolę fokusu.
+
+Migrację zastosowano w TaskOn jako `20261016143642_business_profiles_and_catalog.sql`. Baza potwierdziła RLS na wszystkich trzech nowych tabelach; doradca bezpieczeństwa nie wskazał problemów dotyczących tych obiektów. Plik migracji dopasowano do wersji potwierdzonej przez Supabase.
