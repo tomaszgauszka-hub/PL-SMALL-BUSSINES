@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, LockKeyhole, ShieldCheck
 type Mode = "login" | "signup" | "reset" | "password" | "resend";
 const copy: Record<Mode, { title: string; description: string; button: string }> = {
   login: { title: "Dobrze Cię widzieć.", description: "Zaloguj się, aby otworzyć swoją prywatną bazę.", button: "Zaloguj się" },
-  signup: { title: "Zacznij swoją Małą Księgę.", description: "Utwórz konto. Potwierdzisz email przed pierwszym logowaniem.", button: "Utwórz konto" },
+  signup: { title: "Zacznij swoją Małą Księgę.", description: "Utwórz konto, aby prowadzić prywatną ewidencję.", button: "Utwórz konto" },
   reset: { title: "Odzyskaj dostęp.", description: "Wyślemy link na adres przypisany do konta.", button: "Wyślij link" },
   password: { title: "Ustaw nowe hasło.", description: "Otwórz tę stronę z linku odzyskiwania hasła.", button: "Zapisz nowe hasło" },
   resend: { title: "Potwierdź swój email.", description: "Podaj adres użyty przy rejestracji. Wyślemy nowy link.", button: "Wyślij potwierdzenie" },
@@ -49,6 +49,8 @@ export default function AuthForm({ configured, recovery = false, linkError = fal
       </div>
       <div className="auth-card">
         <span className="auth-lock"><LockKeyhole size={24} /></span><h2>{content.title}</h2><p>{content.description}</p>
+        {['login', 'signup'].includes(mode) && <p>Masz już konto w TaskOn? Zaloguj się tym samym emailem i hasłem.</p>}
+        {['reset', 'password'].includes(mode) && <p>Zmiana hasła obejmie również Twoje konto w TaskOn.</p>}
         {!configured && <div className="notice amber"><span>Logowanie nie jest jeszcze uruchomione w tym wdrożeniu.</span></div>}
         {message && <div className="notice info" role="status"><CheckCircle2 size={18} /><span>{message}</span></div>}
         <form onSubmit={submit} key={mode} aria-busy={busy}>
