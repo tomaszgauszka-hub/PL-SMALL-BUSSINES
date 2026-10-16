@@ -9,14 +9,21 @@
 - Utworzono 11 tabel z RLS, funkcje SECURITY INVOKER i prywatny bucket mk-evidence.
 - Sprawdzono w rzeczywistym PostgreSQL izolację dwóch kont, idempotencję i odczyt plików. Test zakończył się ROLLBACK; nie pozostały dane testowe.
 - 35 testów lokalnych oraz kompilacja produkcyjna przechodzą.
+- Wszystkie 48 plików opublikowano w repozytorium. Porównanie drzewa Git potwierdziło zgodność bajtów z wersją lokalną.
+- Vercel połączono z główną gałęzią repozytorium. Produkcja https://plsmallbusiness.vercel.app odpowiada HTTP 200.
+- Zapisano NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY i NEXT_PUBLIC_APP_URL tylko dla produkcji, po czym przebudowano wdrożenie do stanu Ready.
+- GitHub Actions wykonał kontrolę typów, testy i build poprawnie również po zmianach logowania.
+- Zdiagnozowano rejestrację: Supabase zwraca user_already_exists dla adresu istniejącego we wspólnym Auth. Formularz objaśnia użycie konta TaskOn oraz wspólne hasło.
 
-## Blokady połączeń
+## Pozostałe kroki
 
-GitHub odrzuca utworzenie pierwszego pliku .gitignore kodem 403 Resource not accessible by integration. Odczyt metadanych i oznaczenia push/admin nie są dowodem dostępności operacji zapisu przez konektor. Repo pozostało puste.
+Przygotowano dwa dokładne adresy powrotu Auth aplikacji. Zapis do listy Redirect URLs projektu TaskOn oczekuje zatwierdzenia. Główny Site URL pozostawiono bez zmian.
 
-Vercel odrzuca aktualizację konfiguracji oraz utworzenie publicznych zmiennych produkcyjnych kodem 403 dla scope tomaszgauszka-hubs-projects. Zmienne nie zostały zapisane. Samo odczytanie projektu działa. Próba wdrożenia podglądu bezpośrednio z plików, z zachowaniem SSO, również została odrzucona 403. Git nie ma własnej sesji uwierzytelnienia, GitHub CLI nie jest dostępny, a Vercel CLI zwraca loggedIn: false.
+Pozostaje sprawdzenie prywatnej sesji na istniejącym, uprawnionym koncie: logowanie, zapis, odczyt w drugiej przeglądarce i odzyskiwanie hasła. Nie utworzono dodatkowych kont testowych w produkcyjnym Auth.
 
-Automatyczna kontrola odrzuciła ssoProtection: null, ponieważ wyłączałoby ochronę SSO całego projektu bez osobnej zgody na taki zakres. Ponowiona, węższa konfiguracja pozostawiła SSO bez zmian, ale została odrzucona przez API Vercel kodem 403.
+## Połączenia
+
+Konektory GitHub i Vercel odrzucały zapis kodem 403. Użytkownik zatwierdził dokończenie przez przeglądarkę; tą drogą opublikowano kod i skonfigurowano produkcję. Nie wyłączano ochrony SSO całego projektu.
 
 ## Kontrola bezpieczeństwa
 
