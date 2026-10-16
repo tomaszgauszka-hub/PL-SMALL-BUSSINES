@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowLeft, ArrowRight, BookOpen, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react";
+import Brand from "../brand";
+import { ArrowLeft, ArrowRight, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react";
 
 type Mode = "login" | "signup" | "reset" | "password" | "resend";
 const copy: Record<Mode, { title: string; description: string; button: string }> = {
   login: { title: "Dobrze Cię widzieć.", description: "Zaloguj się, aby otworzyć swoją prywatną bazę.", button: "Zaloguj się" },
-  signup: { title: "Zacznij swoją Małą Księgę.", description: "Utwórz konto, aby prowadzić prywatną ewidencję.", button: "Utwórz konto" },
+  signup: { title: "Zacznij z Ewidorą.", description: "Utwórz konto, aby prowadzić prywatną ewidencję.", button: "Utwórz konto" },
   reset: { title: "Odzyskaj dostęp.", description: "Wyślemy link na adres przypisany do konta.", button: "Wyślij link" },
   password: { title: "Ustaw nowe hasło.", description: "Otwórz tę stronę z linku odzyskiwania hasła.", button: "Zapisz nowe hasło" },
   resend: { title: "Potwierdź swój email.", description: "Podaj adres użyty przy rejestracji. Wyślemy nowy link.", button: "Wyślij potwierdzenie" },
@@ -40,9 +41,9 @@ export default function AuthForm({ configured, recovery = false, linkError = fal
     <a className="auth-back" href="/"><ArrowLeft size={16} />Wróć do aplikacji</a>
     <section className="auth-layout">
       <div className="auth-story">
-        <a className="brand" href="/"><span className="brand-mark"><BookOpen size={25} /></span><span>mała<span className="brand-light">księga</span></span></a>
-        <span className="eyebrow">TWOJA DZIAŁALNOŚĆ. TWÓJ SPOKÓJ.</span>
-        <h1>Mniej papierów.<br />Więcej swojego.</h1>
+        <a className="brand" href="/" aria-label="Ewidora — strona główna"><Brand tagline /></a>
+        <span className="eyebrow">DOBRY POCZĄTEK TWOJEJ DZIAŁALNOŚCI.</span>
+        <h1>Mały biznes.<br />Jasne finanse.</h1>
         <p>Sprzedaż, koszty, klienci i rozliczenie roczne. Wszystko w jednym miejscu, na telefonie i komputerze.</p>
         <div className="auth-points"><span><CheckCircle2 size={18} />Osobna ewidencja sprzedaży i wpłat</span><span><CheckCircle2 size={18} />Prywatna baza przypisana do konta</span><span><CheckCircle2 size={18} />Raporty, eksporty i kontrola limitu</span></div>
         <div className="auth-security"><ShieldCheck size={23} /><span>Twoje dane należą do Ciebie.<small>Hasło nie trafia do Twojej ewidencji rozliczeń.</small></span></div>
