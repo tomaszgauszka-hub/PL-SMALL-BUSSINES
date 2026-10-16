@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
-export const viewport = { width: "device-width", initialScale: 1, themeColor: "#23765b" };
+import "./brand.css";
+export const viewport = { width: "device-width", initialScale: 1, themeColor: "#142c45" };
 
 export const metadata: Metadata = {
-  title: "Mała Księga — Twoja działalność, pod kontrolą",
+  title: "Ewidora — Mały biznes. Jasne finanse.",
   description: "Sprzedaż, wydatki, klienci i podsumowanie PIT-36. Prosta ewidencja działalności nierejestrowanej, dostępna na każdym urządzeniu.",
+  applicationName: "Ewidora",
+  openGraph: {
+    title: "Ewidora — Mały biznes. Jasne finanse.",
+    description: "Przychody, wydatki, klienci i PIT-36. Twoja działalność nierejestrowana pod kontrolą.",
+    locale: "pl_PL",
+    type: "website",
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
