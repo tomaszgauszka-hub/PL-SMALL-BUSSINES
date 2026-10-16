@@ -39,7 +39,7 @@ Dalsze migracje muszą dotyczyć obiektów tej aplikacji i uwzględniać histori
 
 Pozostaw istniejący Site URL, szablony wiadomości, SMTP oraz ustawienia rejestracji TaskOn. Nie wklejaj globalnie konfiguracji lokalnego supabase/config.toml ani szablonów z tego repozytorium.
 
-Przygotowane adresy w Supabase Authentication → URL Configuration → Redirect URLs (zapis oczekuje zatwierdzenia):
+Zapisane i potwierdzone adresy w Supabase Authentication → URL Configuration → Redirect URLs:
 
 ~~~text
 https://plsmallbusiness.vercel.app/auth/callback
@@ -62,4 +62,4 @@ TaskOn ma włączone nowe konta email i wyłączone obowiązkowe potwierdzanie e
 6. Sprawdź eksport CSV/JSON oraz ponowny import bez duplikatów.
 7. Bez sesji API aplikacji ma zwracać 401, a POST z obcym Origin — 403.
 
-Kontrole bazy, testy lokalne i GitHub Actions są zakończone. Pełny test prywatnej sesji przeglądarka → aplikacja → Auth → baza pozostaje do wykonania na uprawnionym koncie. Adresy powrotu Auth wymagają jeszcze zatwierdzenia.
+Kontrole bazy, testy lokalne i GitHub Actions są zakończone. Produkcyjny test HTTP rejestracja → sesja → API → baza → odczyt w drugiej sesji zakończył się powodzeniem. Potwierdzono także izolację drugiego konta, bezpieczne cookies, ochronę Origin, idempotencję i wylogowanie. Po teście usunięto oba konta techniczne i ich dane. Wysyłki wiadomości odzyskiwania hasła na skrzynkę użytkownika nie testowano.
