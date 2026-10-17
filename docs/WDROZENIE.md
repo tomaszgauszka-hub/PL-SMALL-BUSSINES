@@ -63,3 +63,12 @@ TaskOn ma włączone nowe konta email i wyłączone obowiązkowe potwierdzanie e
 7. Bez sesji API aplikacji ma zwracać 401, a POST z obcym Origin — 403.
 
 Kontrole bazy, testy lokalne i GitHub Actions są zakończone. Produkcyjny test HTTP rejestracja → sesja → API → baza → odczyt w drugiej sesji zakończył się powodzeniem. Potwierdzono także izolację drugiego konta, bezpieczne cookies, ochronę Origin, idempotencję i wylogowanie. Po teście usunięto oba konta techniczne i ich dane. Wysyłki wiadomości odzyskiwania hasła na skrzynkę użytkownika nie testowano.
+
+
+## Laboratorium KSeF TEST — 17.10.2026
+
+Migracja dokumentów: `20261017115254_ksef_test_documents.sql`, zastosowana po migracji laboratorium `20261017111004`. Nie wymaga nowych sekretów ani zmian globalnego Auth/SMTP TaskOn. Przydział laboratorium pozostaje administracyjny, na podstawie UUID potwierdzonego konta. Nie dodawaj przydziału na podstawie pola edytowalnego przez przeglądarkę.
+
+Trasa `/api/ksef-test` działa jako Node.js Function (maxDuration 60 s). `next.config.ts` dołącza lokalne XSD oraz worker/WASM xmllint; biblioteki kryptograficzne pozostają po stronie serwera. Sprawdź te pliki w śladzie funkcji po zmianie konfiguracji bundlera. Nowa wersja nie potrzebuje płatnej kolejki, crona ani serwera.
+
+Próba odbioru: na przypisanym koncie otwórz KSeF TEST, sprawdź połączenie, zapisz fakturę z fikcyjnymi pozycjami i zatwierdzoną zgodą TEST, wyślij raz. Gdy MF nadal przetwarza, odczekaj widoczny limit i wybierz Sprawdź status. Oczekiwane: numer KSeF TEST i pobrania XML/UPO. Po utracie odpowiedzi nigdy nie ponawiaj wysyłki tej samej faktury — użyj statusu. Z drugiego urządzenia odśwież widok. Bez sesji API zwraca 401, obcy Origin 403, inne konto nie otrzymuje laboratorium.
