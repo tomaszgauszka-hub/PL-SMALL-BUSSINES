@@ -27,6 +27,8 @@ Zakres nie obejmuje metod kasowych, rozliczeń kwartalnych, walut i zagranicy, r
 
 Reguły i źródła urzędowe zweryfikowano 16.10.2026. Szczegóły: [PLAN-JDG.md](docs/PLAN-JDG.md).
 
+Księgowość JDG — etap P0 (17.10.2026): wersjonowany rejestr reguł z podstawą prawną (`lib/tax-rules.ts`), ryczałt według rodzajów przychodu z art. 12 ust. 1 i progiem 8,5% / 12,5% (`lib/lump-sum.ts`) oraz ocena dokumentów niejednoznacznych ze statusami AUTO_VERIFIED / NEEDS_USER_INPUT / NEEDS_EXPERT_REVIEW / UNSUPPORTED_OR_INVALID (`lib/document-review.ts`). Audyt: [ACCOUNTING_GAP_ANALYSIS.md](docs/ACCOUNTING_GAP_ANALYSIS.md) · zakres: [JDG_COVERAGE_MATRIX.md](docs/JDG_COVERAGE_MATRIX.md) · postęp: [ACCOUNTING_IMPLEMENTATION_STATUS.md](docs/ACCOUNTING_IMPLEMENTATION_STATUS.md). Od 1.01.2027 aplikacja wymaga rozszerzenia o kolejny rok i KSeF produkcyjny.
+
 KSeF TEST (17.10.2026): prywatne [laboratorium dla fikcyjnej JDG](docs/PLAN-KSEF-TEST.md) obejmuje panel `/ksef-test`, XAdES, walidację FA(3), szyfrowanie, rzeczywistą wysyłkę do MF TEST, status, testowy numer KSeF oraz prywatne pobrania XML/UPO. Dostęp ma wyłącznie konto z administracyjnie przypisanym laboratorium. Klucze i tokeny istnieją tylko w pamięci pojedynczego żądania. Dokumenty TEST nie zasilają księgowości.
 
 ## Architektura i wdrożenie
@@ -52,7 +54,7 @@ pnpm test
 pnpm build
 ```
 
-100 testów: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, remanent miesięczny/roczny, poprawki spisów, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia oraz dostęp do laboratorium wyłącznie TEST/JDG. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych. Nowy pilot KSeF korzysta z istniejącego konta; jego fikcyjna tożsamość jest przechowywana osobno od księgowości. 17.10.2026 wykonano rzeczywisty pełny obieg MF TEST: podpis XAdES, szyfrowanie FA(3), przyjęcie z numerem KSeF oraz pobranie i sprawdzenie UPO (5508 bajtów). Test wykonywał ten sam adapter serwerowy; obsługa konta w przeglądarce wymaga osobnej weryfikacji po wdrożeniu.
+130 testów, w tym scenariusze ryczałtu wielostawkowego z progiem, korekty przenoszone na kolejne okresy i ocena dokumentów niejednoznacznych. Wcześniejszy zakres: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, remanent miesięczny/roczny, poprawki spisów, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia oraz dostęp do laboratorium wyłącznie TEST/JDG. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych. Nowy pilot KSeF korzysta z istniejącego konta; jego fikcyjna tożsamość jest przechowywana osobno od księgowości. 17.10.2026 wykonano rzeczywisty pełny obieg MF TEST: podpis XAdES, szyfrowanie FA(3), przyjęcie z numerem KSeF oraz pobranie i sprawdzenie UPO (5508 bajtów). Test wykonywał ten sam adapter serwerowy; obsługa konta w przeglądarce wymaga osobnej weryfikacji po wdrożeniu.
 
 [Raport prac](docs/STATUS.md) · [Wdrożenie](docs/WDROZENIE.md) · [Marka](docs/BRAND.md)
 
