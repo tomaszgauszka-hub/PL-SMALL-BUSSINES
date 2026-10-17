@@ -77,7 +77,7 @@ Zobacz [JDG_COVERAGE_MATRIX.md](JDG_COVERAGE_MATRIX.md). Najważniejsze: ZUS, de
 ### Kolejne zadania
 
 1. P0: tabela `mk_tax_decisions` (tylko dopisywanie) i odpowiadanie na pytania dla wystawionych dokumentów; rodzaj przychodu w katalogu; zapis odpowiedzi z art. 8 w profilu roku.
-2. P0: przygotowanie roku 2027 — reguły po ogłoszeniu wartości, migracja zakresów dat.
+2. P0: przygotowanie roku 2027 według [PLAN-2027.md](PLAN-2027.md) — obsługiwane lata, reguły 2027, otwarcie roku, KSeF produkcyjny.
 3. P1: kalkulator ZUS i składki zdrowotnej (wersjonowane reguły 2025–2026, zależność od formy opodatkowania), DRA i KEDU.
 4. P1: JPK_V7M, zestawienie PIT-28, panel „Rozlicz miesiąc” ze statusami deklaracji i wpłat.
 5. P1: `docs/BEFORE_START_ACCOUNTING_PL.md`, projekt regulaminu i polityki prywatności, onboarding.
