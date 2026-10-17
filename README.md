@@ -27,6 +27,8 @@ Zakres nie obejmuje metod kasowych, rozliczeń kwartalnych, walut i zagranicy, r
 
 Reguły i źródła urzędowe zweryfikowano 16.10.2026. Szczegóły: [PLAN-JDG.md](docs/PLAN-JDG.md).
 
+KSeF TEST (17.10.2026): przygotowano [plan integracji dla fikcyjnej JDG](docs/PLAN-KSEF-TEST.md), odseparowaną tabelę laboratorium, przypisanie pilota do potwierdzonego konta oraz utworzenie syntetycznej osoby w MF TEST (HTTP 200). Panel, uwierzytelnianie, wysyłka faktury FA(3) i UPO pozostają do implementacji. Laboratorium nie zasila rzeczywistej księgowości.
+
 ## Architektura i wdrożenie
 
 | Zasób | Konfiguracja |
@@ -34,7 +36,7 @@ Reguły i źródła urzędowe zweryfikowano 16.10.2026. Szczegóły: [PLAN-JDG.m
 | GitHub | tomaszgauszka-hub/PL-SMALL-BUSSINES |
 | Vercel | plsmallbusiness; preset Next.js, Node.js 24 |
 | Supabase | istniejący TaskOn, booexvenlxuyrnamhsoi |
-| Dane | 21 tabel public.mk_*, RLS, prywatne funkcje mk_private |
+| Dane | 22 tabele public.mk_*, RLS, prywatne funkcje mk_private |
 | Pliki | prywatny bucket mk-evidence |
 
 Next.js 16, React 19, TypeScript, Supabase Auth i PostgreSQL. API używa JWT zalogowanego użytkownika i auth.uid(); nie korzysta z klucza service-role. Cookies HttpOnly/Secure/SameSite, brak publicznego cache dla danych prywatnych, kontrola Origin zapisów. Identyfikatory operacji, transakcje, niezmienność wystawionych dokumentów i wersjonowanie edytowalnych rekordów chronią pracę na kilku urządzeniach. Odświeżanie po zapisach, powrocie do karty i co 30 sekund.
@@ -50,7 +52,7 @@ pnpm test
 pnpm build
 ```
 
-84 testy: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, remanent miesięczny/roczny, poprawki spisów, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych; nie pozostawiono danych testowych. Nowe mechanizmy JDG są sprawdzane osobnym zestawem testów, bez tworzenia kolejnych kont produkcyjnych.
+87 testów: dokładne kwoty, progi i zaokrąglenia, miesięczne/roczne PIT, odliczenia składek, wiele stawek ryczałtu, VAT do przeniesienia, terminy, remanent miesięczny/roczny, poprawki spisów, import, izolacja dwóch kont w PostgreSQL/PGlite, transakcje, wersje i ponowienia oraz dostęp do laboratorium wyłącznie TEST/JDG. Wcześniejszy produkcyjny test rejestracji/logowania i prywatnej ewidencji zakończył się usunięciem kont technicznych. Nowy pilot KSeF korzysta z istniejącego konta; jego fikcyjna tożsamość jest przechowywana osobno od księgowości. Testy dostępu nie zastępują przyszłego pełnego testu wysyłki i UPO.
 
 [Raport prac](docs/STATUS.md) · [Wdrożenie](docs/WDROZENIE.md) · [Marka](docs/BRAND.md)
 
