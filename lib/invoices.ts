@@ -2,12 +2,14 @@ import { z } from "zod";
 import type { InvoiceLineInput } from "./business.ts";
 import { calculateInvoice, LUMP_SUM_RATES } from "./business.ts";
 import { validDate, validNip, today } from "./domain.ts";
+import { revenueCategory } from "./lump-sum.ts";
 const text = (max: number) => z.string().trim().max(max);
 const uuid = z.string().uuid();
 const optionalId = z.union([uuid, z.literal("")]);
 const date = z.string().refine(validDate, "Nieprawidłowa data.").refine(d => d >= "2025-01-01" && d <= "2026-12-31", "Obsługiwane lata: 2025–2026.");
 const money = z.number().int().min(0).max(99999999999);
-export const invoiceLineInput = z.object({ name: text(300).min(1, "Wpisz nazwę pozycji."), unit: text(30).min(1), quantityMilli: z.number().int().min(-1000000000).max(1000000000).refine(n => n !== 0, "Ilość nie może wynosić zero."), unitPrice: money, vatRate: z.enum(["23", "8", "5", "0", "zw", "np"]), discountBps: z.number().int().min(0).max(10000), lumpSumRate: z.number().int().refine(n => LUMP_SUM_RATES.some(rate => Math.round(rate * 100) === n), "Sprawdź stawkę ryczałtu."), productId: optionalId });
+export const invoiceLineInput = z.object({ name: text(300).min(1, "Wpisz nazwę pozycji."), unit: text(30).min(1), quantityMilli: z.number().int().min(-1000000000).max(1000000000).refine(n => n !== 0, "Ilość nie może wynosić zero."), unitPrice: money, vatRate: z.enum(["23", "8", "5", "0", "zw", "np"]), discountBps: z.number().int().min(0).max(10000), lumpSumRate: z.number().int().refine(n => LUMP_SUM_RATES.some(rate => Math.round(rate * 100) === n), "Sprawdź stawkę ryczałtu."), productId: optionalId,
+  revenueCategory: z.string().max(20).optional(), classificationSource: z.enum(["", "user_confirmed", "pkd_hint", "ai_suggestion", "legacy_rate_only"]).optional(), pkwiu: text(20).refine(v => !v || /^(\d{2})(\.\d{1,2}){0,3}$/.test(v), "Symbol PKWiU w formacie np. 62.01.11.0.").optional() });
 export const invoiceInput = z.object({
   id: uuid, direction: z.enum(["sale", "purchase"]), status: z.enum(["draft", "issued"]), kind: z.enum(["regular", "correction"]), number: text(80),
   clientId: optionalId, partyName: text(160).min(1, "Wpisz nazwę kontrahenta."), partyAddress: text(400), partyNip: text(20).transform(v => v.replace(/[\s-]/g, "")).refine(validNip, "Nieprawidłowy NIP kontrahenta."),
@@ -16,7 +18,16 @@ export const invoiceInput = z.object({
   vatDeductionBps: z.number().int().min(0).max(10000), costDeductionBps: z.number().int().min(0).max(10000), costCategory: z.enum(["goods", "incidental", "other"]),
   exemptionBasis: text(300), paymentAccount: text(40).refine(v => !v || /^\d{26}$/.test(v.replace(/\s/g, "")), "Rachunek powinien zawierać 26 cyfr."), splitPayment: z.boolean(), vatLimitIncluded: z.boolean().default(true),
   initialPayment: money.default(0), paymentDate: date, method: z.enum(["Przelew", "Gotówka", "Karta", "Inne"]), version: z.number().int().nonnegative(),
+  supplyStructure: z.enum(["", "separate", "composite"]).optional(), correctionCause: z.enum(["", "error", "other"]).optional(),
+  reviewAnswers: z.record(z.string().max(60), z.string().max(60)).refine(v => Object.keys(v).length <= 20, "Za dużo odpowiedzi.").optional(),
 }).superRefine((v, ctx) => {
+  for (const line of v.lines) {
+    if (!line.revenueCategory) continue;
+    const category = revenueCategory(line.revenueCategory);
+    if (!category || category.outsideJdg) ctx.addIssue({ code: "custom", message: "Wybierz rodzaj przychodu z działalności z aktualnego katalogu." });
+    else if (category.rateBps !== line.lumpSumRate) ctx.addIssue({ code: "custom", message: `Stawka ryczałtu pozycji „${line.name}” nie odpowiada wybranemu rodzajowi przychodu.` });
+  }
+  if (v.kind !== "correction" && v.correctionCause) ctx.addIssue({ code: "custom", message: "Przyczynę korekty podaje się tylko dla korekty." });
   if (v.status === "issued" && v.issueDate > today()) ctx.addIssue({ code: "custom", message: "Przyszły dokument zapisz jako szkic." });
   if (v.kind === "regular" && v.lines.some(line => line.quantityMilli < 0)) ctx.addIssue({ code: "custom", message: "Ujemne pozycje zapisuj jako korektę." });
   if (v.kind === "correction" && (!v.parentId || !v.reason)) ctx.addIssue({ code: "custom", message: "Korekta wymaga dokumentu źródłowego i przyczyny." });
