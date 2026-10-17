@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["xmllint-wasm", "xadesjs", "@peculiar/x509"],
+  outputFileTracingIncludes: { "/api/ksef-test": ["./lib/ksef/schemas/**/*", "./node_modules/xmllint-wasm/**/*"] },
 };
 
 export default nextConfig;
