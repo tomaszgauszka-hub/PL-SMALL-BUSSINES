@@ -16,7 +16,10 @@ export function demoBusinessState(): BusinessState { return { profile: defaultBu
   { id: "00000000-0000-4000-8000-000000000802", name: "Projekt graficzny", kind: "service", sku: "USL-001", unit: "usł.", unitPrice: 25000, vatRate: "zw", lumpSumRate: 1500, description: "Projekt indywidualny", archived: false, version: 1 },
 ] }; }
 
-export type InvoiceLineInput = { name: string; unit: string; quantityMilli: number; unitPrice: number; vatRate: VatRate; discountBps: number; lumpSumRate: number; productId: string };
+export type ClassificationSource = "" | "user_confirmed" | "pkd_hint" | "ai_suggestion" | "legacy_rate_only";
+// Income tax (ryczałt category and rate) and VAT treatment are separate fields
+// on every line. revenueCategory is the art. 12 ust. 1 provision confirmed by the user.
+export type InvoiceLineInput = { name: string; unit: string; quantityMilli: number; unitPrice: number; vatRate: VatRate; discountBps: number; lumpSumRate: number; productId: string; revenueCategory?: string; classificationSource?: ClassificationSource; pkwiu?: string };
 const MAX_MONEY = 99999999999n;
 function roundRatio(n: bigint, d: bigint): bigint { return n < 0n ? -((-n + d / 2n) / d) : (n + d / 2n) / d; }
 // Exact integer arithmetic: amounts are grosze, quantities have three decimals.
