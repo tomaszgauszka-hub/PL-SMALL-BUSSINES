@@ -79,7 +79,7 @@ after(async()=>{await db?.close();});
 test('explicit grants defeat permissive Supabase defaults for every Ewidora table',async()=>{
  await db.exec('reset role');
  const grants=(await db.query("select tablename,has_table_privilege('authenticated',quote_ident(schemaname)||'.'||quote_ident(tablename),'delete') as del,has_table_privilege('authenticated',quote_ident(schemaname)||'.'||quote_ident(tablename),'truncate') as trunc,has_table_privilege('anon',quote_ident(schemaname)||'.'||quote_ident(tablename),'select') as anonymous from pg_tables where schemaname='public' and tablename like 'mk_%'" )).rows;
- assert.equal(grants.length,21);assert.equal(grants.some(row=>row.del||row.trunc||row.anonymous),false);
+ assert.equal(grants.length,22);assert.equal(grants.some(row=>row.del||row.trunc||row.anonymous),false);
  assert.equal((await db.query("select has_table_privilege('authenticated','public.mk_invoice_payments','update') as allowed")).rows[0].allowed,false);
  await asUser(db,alice);await assert.rejects(db.exec('truncate public.mk_inventories'),/permission denied/);
 });
