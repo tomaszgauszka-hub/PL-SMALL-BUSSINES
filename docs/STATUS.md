@@ -82,3 +82,14 @@ Migracje zastosowane i potwierdzone przez Supabase:
 - `20261016204912_ewidora_explicit_privileges.sql`
 
 Nie tworzono kont technicznych ani wpisów księgowych w produkcji. Pozostały zakres: środki trwałe, formalne struktury KPiR/JPK i szczególne procedury. Moduł nie obejmuje remanentu likwidacyjnego VAT.
+
+
+## KSeF TEST — 17.10.2026, Ewidora 2.2
+
+Zaimplementowano prywatne laboratorium fikcyjnej JDG: formularz 1–20 pozycji, zwykła faktura PLN z VAT 23/8/5/0/zw., walidacja oficjalnym FA(3) XSD, podpis XAdES samopodpisanym certyfikatem TEST, szyfrowanie zgodne z MF, wysyłka online, status i prywatne pliki XML/UPO. Uprawnione konto widzi pozycję KSeF TEST w nawigacji. Publiczne demo i inne konta nie mają dostępu.
+
+Rzeczywisty test adaptera 17.10.2026 zakończył się statusem MF 200, nadanym numerem KSeF TEST, zamknięciem sesji oraz pobranym i sprawdzonym UPO (5508 bajtów). Faktura z dwiema stawkami: netto 150,00 zł, VAT 27,00 zł, brutto 177,00 zł. Pierwsza operacja zakończyła się po zapisie referencji; sprawdzenie wznowiło odczyt bez ponownego wysłania. Nie jest to symulowana odpowiedź MF. Logowanie i obsługa panelu na koncie pilota w przeglądarce wymagają osobnej weryfikacji po wdrożeniu.
+
+Migracje `20261017111004_ksef_test_workspaces.sql` i `20261017115254_ksef_test_documents.sql` zastosowano w istniejącym projekcie. Obecnie 23 tabele public.mk_* mają RLS. Prywatna dzierżawa w mk_private chroni jednoczesne operacje z dwóch urządzeń, a utrwalony etap przed POST chroni przed ponowieniem nieustalonej wysyłki. Dane testowe nie mają relacji do ewidencji PIT/VAT ani klientów.
+
+Zestaw 100 testów obejmuje podpis i jego naruszenie, szyfrowanie/odszyfrowanie, wszystkie stawki i oficjalne XSD, zgodność hashy, UPO, 429, utratę odpowiedzi, blokadę nieudanego checkpointu, RLS oraz lease. Klucze prywatne i tokeny nie są utrwalane. Zakres: tylko TEST, JDG i zwykłe faktury krajowe PLN; korekty, zaliczki, offline24, spółki i produkcyjny KSeF pozostają poza tym modułem.

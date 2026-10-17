@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./ksef-test/styles.css";
 import "./brand.css";
 export const viewport = { width: "device-width", initialScale: 1, themeColor: "#142c45" };
 
