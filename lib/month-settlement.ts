@@ -60,7 +60,7 @@ export function settleMonth(input: { report: JdgReport; ledger: InvoiceState; pr
     ...duplicates.map(group => `Możliwy duplikat zakupu: ${group.map(doc => doc.number).join(" i ")} (${group[0].partyName}, ${zl(group[0].gross)}).`),
   ];
   steps.push({ id: "documents", title: "Dokumenty miesiąca", state: docDetails.length ? "action" : sales.length || purchases.length ? "done" : "info",
-    summary: sales.length || purchases.length ? `${sales.length} sprzedaży · ${purchases.length} zakupów` : "Brak wystawionych dokumentów w tym miesiącu", details: docDetails });
+    summary: sales.length || purchases.length ? `${sales.length} ${plural(sales.length, "faktura sprzedaży", "faktury sprzedaży", "faktur sprzedaży")} · ${purchases.length} ${plural(purchases.length, "zakup", "zakupy", "zakupów")}` : "Brak wystawionych dokumentów w tym miesiącu", details: docDetails });
 
   const open = [...sales, ...purchases].map(doc => ({ doc, review: report.reviews.get(doc.id) })).filter(item => item.review && item.review.status !== "AUTO_VERIFIED");
   const documents = open.map(({ doc, review }) => ({ id: doc.id, number: doc.number || "Bez numeru", party: doc.partyName, status: review!.status, message: review!.findings[0]?.message ?? "" }));
