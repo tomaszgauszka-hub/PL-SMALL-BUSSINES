@@ -27,10 +27,10 @@ jobs:
             awk '/^\s*not ok/{f=1;c=0} f{print; c++} c>30{f=0}' "$1" | grep -E "error:|expected|actual|message|location|failureType|code:|stack" | head -12 | while read -r line; do echo "::error::$2 detail: $line"; done; }
           for i in $(seq 1 10); do
             if [ "${{ matrix.mode }}" = stress ]; then
-              pnpm test -- --test-reporter=tap > "a-$i.tap" 2>&1 & pnpm test -- --test-reporter=tap > "b-$i.tap" 2>&1 & wait
+              node --test --test-reporter=tap tests/*.test.mjs > "a-$i.tap" 2>&1 & node --test --test-reporter=tap tests/*.test.mjs > "b-$i.tap" 2>&1 & wait
               for f in a b; do grep -E "^# (pass|fail)" "$f-$i.tap" | tr '\n' ' ' | sed "s/^/::notice::stress $i$f: /"; echo; report "$f-$i.tap" "stress $i$f"; done
             else
-              pnpm test -- --test-reporter=tap > "run-$i.tap" 2>&1 || true
+              node --test --test-reporter=tap tests/*.test.mjs > "run-$i.tap" 2>&1 || true
               grep -E "^# (pass|fail)" "run-$i.tap" | tr '\n' ' ' | sed "s/^/::notice::plain $i: /"; echo; report "run-$i.tap" "plain $i"
             fi
           done
