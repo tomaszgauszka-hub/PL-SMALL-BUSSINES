@@ -27,6 +27,8 @@ export type TestDocument = {
 };
 export type TestWorkspace = { id: string; display_name: string; test_nip: string; environment: "TEST"; business_type: "jdg"; status: string; last_auth_at: string | null };
 export type TestState = { workspace: TestWorkspace; documents: TestDocument[] };
+// FA(3) TNIP pattern: digits 2–3 of a NIP are never both zero.
+export const FA3_NIP_PATTERN = /^[1-9]((\d[1-9])|([1-9]\d))\d{7}$/;
 export function syntheticBuyerNip(id: string, seller: string) {
   const seed = id.replace(/-/g, "");
   for (let n = 0; n < 100; n++) {
@@ -34,7 +36,7 @@ export function syntheticBuyerNip(id: string, seller: string) {
     d[0] = d[0] || 1;
     const checksum = d.reduce((s, v, i) => s + v * [6, 5, 7, 2, 3, 4, 5, 6, 7][i], 0) % 11;
     const nip = d.join("") + checksum;
-    if (checksum < 10 && nip !== seller && validNip(nip)) return nip;
+    if (checksum < 10 && nip !== seller && validNip(nip) && FA3_NIP_PATTERN.test(nip)) return nip;
   }
   throw new Error("Nie udało się przygotować fikcyjnego nabywcy.");
 }
