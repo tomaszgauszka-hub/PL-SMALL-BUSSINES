@@ -1,0 +1,11 @@
+saved 01-pulpit-jdg
+saved 02-rozlicz-miesiac-wrzesien
+saved 03-rozlicz-miesiac-pazdziernik
+saved 04-ocena-dokumentu
+saved 05-faktury
+saved 06-nowa-faktura-ryczalt
+saved 07-pit-i-vat
+saved 08-demo-dn
+saved 09-mobile-pulpit
+saved 10-mobile-rozlicz
+no browser errors
