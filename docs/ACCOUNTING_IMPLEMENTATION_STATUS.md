@@ -94,7 +94,7 @@ Decyzja: projekt kończy się jako portfolio. KSeF zostaje w bezpłatnym środow
 
 ### Testy
 
-136 testów (6 nowych w `tests/month-settlement.test.mjs`: dane demo, statusy miesięcy, termin po czasie, blokada przy błędnym ujęciu, luki i duplikaty, odmiana liczebników). Kontrola wizualna 10 zrzutów (desktop i mobile) bez błędów przeglądarki. Jeden przebieg CI dla commita `7847cc1` nie przeszedł kroku testów, a ponowienie bez zmian kodu przeszło — test niestabilny, przyczyny nie ustalono (logi CI nie były dostępne z sesji roboczej; podejrzane są testy KSeF z losowymi danymi).
+136 testów (6 nowych w `tests/month-settlement.test.mjs`: dane demo, statusy miesięcy, termin po czasie, blokada przy błędnym ujęciu, luki i duplikaty, odmiana liczebników). Kontrola wizualna 10 zrzutów (desktop i mobile) bez błędów przeglądarki. Dwa przebiegi CI nie przeszły testów KSeF. Przyczyna: generator fikcyjnego NIP nabywcy czasem tworzył numer z „00” na pozycjach 2–3, który oficjalny schemat FA(3) odrzuca (ok. 1 na 100 faktur TEST). Poprawione w PR #7 wraz z testem na 3000 losowych identyfikatorach.
 
 ### Migracje
 

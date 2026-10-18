@@ -5,7 +5,7 @@ import {randomUUID,webcrypto,privateDecrypt,constants} from 'node:crypto';
 import * as x509 from '@peculiar/x509';
 import * as xades from 'xadesjs';
 import {buildTestInvoice,validateTestXml} from '../lib/ksef/fa3.ts';
-import {testInvoiceInput} from '../lib/ksef/test-model.ts';
+import {testInvoiceInput,syntheticBuyerNip,FA3_NIP_PATTERN} from '../lib/ksef/test-model.ts';
 import {sha256,signedTestChallenge,encryptedTestInvoice,testRequest,KsefTestError,TEST_API} from '../lib/ksef/test-client.ts';
 import {runTestOperation,verifyStoredTestInvoice} from '../lib/ksef/test-service.ts';
 const nip='7980332920',session='20261017-SO-ABCDEF0000-1234567890-AA',reference='20261017-EE-ABCDEF0000-1234567890-AA',number=nip+'-20261017-ABCDEF123456-AB';
@@ -85,4 +85,9 @@ test('TEST transport fixes the host, rejects redirects and exposes rate limit wi
  let calls=0;await assert.rejects(testRequest('https://api.ksef.mf.gov.pl/v2/auth/challenge'),/Niedozwolony/);
  await assert.rejects(testRequest('/auth/challenge',{method:'POST',fetcher:async(url,options)=>{calls++;assert.equal(url,TEST_API+'/auth/challenge');assert.equal(options.redirect,'error');return new Response('{"detail":"limit"}',{status:429,headers:{'Retry-After':'30'}});}}),e=>e.status===429&&e.retryAfter===30);
  assert.equal(calls,1);
+});
+test('synthetic buyer NIP always matches the FA(3) schema pattern',()=>{
+ // Seed digits 1–3 = 1,0,0 previously produced 1000000006, which the official XSD rejects.
+ assert.match(syntheticBuyerNip('10000000-0000-4000-8000-000000000000',nip),FA3_NIP_PATTERN);
+ for(let i=0;i<3000;i++){const buyer=syntheticBuyerNip(randomUUID(),nip);assert.match(buyer,FA3_NIP_PATTERN);assert.notEqual(buyer,nip);}
 });
