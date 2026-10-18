@@ -6,7 +6,7 @@ import { calculateInvoiceLine } from "./business.ts";
 import type { Invoice, InvoiceState } from "./invoices.ts";
 import { invoiceSummary } from "./invoices.ts";
 import type { State } from "./domain.ts";
-import { aggregate, nextBusinessDate, roundedPLN, scaleTaxRawCents, validDate } from "./domain.ts";
+import { aggregate, emptyState, nextBusinessDate, roundedPLN, scaleTaxRawCents, validDate } from "./domain.ts";
 import type { LumpSumRevenue, LumpSumYearResult } from "./lump-sum.ts";
 import { calculateLumpSumYear, taxByRate } from "./lump-sum.ts";
 import type { ReviewResult, ReviewStatus } from "./review-status.ts";
@@ -128,3 +128,16 @@ export function calculateJdgTaxes(ledger: InvoiceState, context: JdgTaxState, co
   if (inventoryApplicable && !inventory.valid) issues.push("Roczny remanent nie ma spisu początkowego — roczny PIT wymaga uzupełnienia danych.");
   return { inventory, inventoryApplicable, taxProfit, year, taxForm: config.taxForm as TaxForm, rows, annual, dn, primaryTax, primaryPaid, primaryBalance: primaryTax - primaryPaid, secondaryTax, secondaryPaid: config.otherAdvances, secondaryBalance: secondaryTax - config.otherAdvances, businessBase, combinedScaleBase, primaryForm: config.taxForm === "scale" ? "PIT-36" : config.taxForm === "linear" ? "PIT-36L" : "PIT-28", healthAllowed, healthLimit, lump, vatSales, legacyVatSales, vatLimit: vatExemptionLimit(year, config.activityStartDate), annualValid, issues, lumpSumYear: lumpYear, reviews, reviewStatus, openDocuments: yearReviews.filter(review => review.status !== "AUTO_VERIFIED").length, verified: annualValid && reviewStatus === "AUTO_VERIFIED" };
 }
+
+export type SupportedYear = 2025 | 2026;
+// One place that resolves the year settings and report used by every JDG view.
+export function jdgYearConfig(tax: JdgTaxState, year: SupportedYear, profile: BusinessProfile, legacy: State): JdgYear {
+  const activityDate = profile.initialType === "dn" ? legacy.settings.startDate || profile.jdgStartDate : profile.jdgStartDate;
+  return tax.years.find(row => row.year === year) ?? defaultJdgYear(year, profile, activityDate);
+}
+export function jdgReport(ledger: InvoiceState, tax: JdgTaxState, profile: BusinessProfile, legacy: State, inventories: Inventory[], year: SupportedYear) {
+  const config = jdgYearConfig(tax, year, profile, legacy);
+  return { config, report: calculateJdgTaxes(ledger, tax, config, profile.initialType === "dn" ? legacy : emptyState(), inventories, profile.jdgStartDate, { vatActive: profile.vatStatus === "active" }) };
+}
+export type JdgReport = ReturnType<typeof calculateJdgTaxes>;
+export function taxFormForYear(tax: JdgTaxState, profile: BusinessProfile) { return (year: number): TaxForm => tax.years.find(row => row.year === year)?.taxForm ?? profile.taxForm; }

@@ -13,7 +13,7 @@ export function businessLabel(type: BusinessType) { return type === "jdg" ? "Jed
 export function defaultBusinessProfile(type: BusinessType = "dn"): BusinessProfile { return { businessType: type, initialType: type, jdgStartDate: "", taxForm: "scale", vatStatus: "exempt", vatStartDate: "", exemptionBasis: "art. 113 ust. 1 lub 9 ustawy o VAT", configured: type === "dn", version: 0 }; }
 export function demoBusinessState(): BusinessState { return { profile: defaultBusinessProfile(), events: [], products: [
   { id: "00000000-0000-4000-8000-000000000801", name: "Zaproszenie ślubne", kind: "product", sku: "PAP-001", unit: "szt.", unitPrice: 1500, vatRate: "zw", lumpSumRate: 550, description: "Zaproszenie z kopertą i personalizacją", archived: false, version: 1 },
-  { id: "00000000-0000-4000-8000-000000000802", name: "Projekt graficzny", kind: "service", sku: "USL-001", unit: "usł.", unitPrice: 25000, vatRate: "zw", lumpSumRate: 1500, description: "Projekt indywidualny", archived: false, version: 1 },
+  { id: "00000000-0000-4000-8000-000000000802", name: "Projekt graficzny", kind: "service", sku: "USL-001", unit: "usł.", unitPrice: 25000, vatRate: "zw", lumpSumRate: 1400, description: "Projekt indywidualny — specjalistyczne projektowanie, PKWiU 74.10", archived: false, version: 1 },
 ] }; }
 
 export type ClassificationSource = "" | "user_confirmed" | "pkd_hint" | "ai_suggestion" | "legacy_rate_only";

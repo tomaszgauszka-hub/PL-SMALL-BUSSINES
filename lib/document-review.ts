@@ -16,6 +16,7 @@ export type ReviewDocument = {
   notes?: string; reason?: string; supplyStructure?: SupplyStructure; correctionCause?: CorrectionCause; reviewAnswers?: Record<string, string>;
 };
 export type ReviewContext = { taxForm: "scale" | "linear" | "lump_sum"; vatActive: boolean; source?: { taxDate: string } | null };
+export type TaxFormFor = (year: number) => ReviewContext["taxForm"];
 
 // Answer values that a purchase question accepts, by question code.
 export const PURCHASE_QUESTIONS: Record<string, { question: string; options: [string, string][] }> = {
@@ -90,7 +91,9 @@ export function reviewDocument(doc: ReviewDocument, ctx: ReviewContext): ReviewR
   findings.push(...correctionFindings(doc, ctx));
   return reviewResult(findings);
 }
-export function reviewLedger<T extends ReviewDocument & { id: string; parentId: string }>(documents: T[], ctx: Omit<ReviewContext, "source">) {
+// taxFormFor lets each document use the tax form of its own tax year.
+export function reviewLedger<T extends ReviewDocument & { id: string; parentId: string }>(documents: T[], ctx: Omit<ReviewContext, "source"> & { taxFormFor?: TaxFormFor }) {
   const byId = new Map(documents.map(doc => [doc.id, doc]));
-  return new Map(documents.map(doc => [doc.id, reviewDocument(doc, { ...ctx, source: doc.parentId ? byId.get(doc.parentId) ?? null : null })]));
+  const { taxFormFor, ...base } = ctx;
+  return new Map(documents.map(doc => [doc.id, reviewDocument(doc, { ...base, taxForm: taxFormFor ? taxFormFor(Number(doc.taxDate.slice(0, 4))) : base.taxForm, source: doc.parentId ? byId.get(doc.parentId) ?? null : null })]));
 }

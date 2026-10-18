@@ -3,12 +3,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Archive, ArrowRight, CheckCircle2, Download, Package, Pencil, Plus, Search, ShieldCheck, X } from "lucide-react";
 import { businessLabel, defaultBusinessProfile, demoBusinessState, emptyBusinessState, LUMP_SUM_RATES, TAX_FORM_LABELS, VAT_RATES } from "../lib/business";
+import { demoJdgProducts, demoJdgProfile } from "../lib/demo-jdg";
 import type { BusinessState, BusinessType, CatalogItem } from "../lib/business";
 import { businessProfileInput, catalogItemInput } from "../lib/business-validation";
 import { dateLabel, decimal, money, parseMoney, today, toCsv } from "../lib/domain";
 
 export function useBusinessData(signedIn: boolean, registrationType: BusinessType | null) {
-  const [state, setState] = useState<BusinessState>(() => signedIn ? emptyBusinessState() : demoBusinessState());
+  const [state, setState] = useState<BusinessState>(() => signedIn ? emptyBusinessState() : { profile: demoJdgProfile(), events: [], products: demoJdgProducts() });
   const [loading, setLoading] = useState(signedIn), [error, setError] = useState("");
   const pending = useRef<{ fingerprint: string; opId: string } | null>(null);
   const sequence = useRef(0);
@@ -48,7 +49,7 @@ export function useBusinessData(signedIn: boolean, registrationType: BusinessTyp
     if (!response.ok) { if (response.status === 409) { pending.current = null; await refresh(); } throw new Error(body.error || "Nie udało się zapisać danych."); }
     pending.current = null; sequence.current++; setState(body); setLoading(false); setError("");
   }
-  function previewType(type: BusinessType) { if (signedIn) return; setState(old => ({ ...old, profile: { ...defaultBusinessProfile(type), configured: true, jdgStartDate: type === "jdg" ? "2026-01-01" : "", vatStatus: type === "jdg" ? "active" : "exempt", vatStartDate: type === "jdg" ? "2026-01-01" : "" }, products: old.products.map(item => ({ ...item, vatRate: type === "jdg" ? "23" : "zw" })) })); }
+  function previewType(type: BusinessType) { if (signedIn) return; setState(old => ({ ...old, profile: type === "jdg" ? demoJdgProfile() : { ...defaultBusinessProfile("dn"), configured: true }, products: type === "jdg" ? demoJdgProducts() : demoBusinessState().products })); }
   return { state, loading, error, refresh, mutate, previewType };
 }
 export type BusinessData = ReturnType<typeof useBusinessData>;
