@@ -7,6 +7,10 @@ permissions:
 jobs:
   diagnose:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [plain, stress]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -19,9 +23,14 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Run the suite repeatedly
         run: |
-          for i in $(seq 1 8); do
-            node --test --test-reporter=tap tests/*.test.mjs > "run-$i.tap" 2>&1 || true
-            grep -E "^# (pass|fail)" "run-$i.tap" | tr '\n' ' ' | sed "s/^/::notice::run $i: /"; echo
-            grep -n -E "^\s*not ok" "run-$i.tap" | while read -r line; do echo "::error::run $i: $line"; done
-            awk '/^\s*not ok/{f=1;c=0} f{print; c++} c>25{f=0}' "run-$i.tap" | grep -E "error:|expected|actual|message|location|failureType|code:" | head -20 | while read -r line; do echo "::error::run $i detail: $line"; done
+          report() { grep -n -E "^\s*not ok" "$1" | while read -r line; do echo "::error::$2: $line"; done
+            awk '/^\s*not ok/{f=1;c=0} f{print; c++} c>30{f=0}' "$1" | grep -E "error:|expected|actual|message|location|failureType|code:|stack" | head -12 | while read -r line; do echo "::error::$2 detail: $line"; done; }
+          for i in $(seq 1 10); do
+            if [ "${{ matrix.mode }}" = stress ]; then
+              pnpm test -- --test-reporter=tap > "a-$i.tap" 2>&1 & pnpm test -- --test-reporter=tap > "b-$i.tap" 2>&1 & wait
+              for f in a b; do grep -E "^# (pass|fail)" "$f-$i.tap" | tr '\n' ' ' | sed "s/^/::notice::stress $i$f: /"; echo; report "$f-$i.tap" "stress $i$f"; done
+            else
+              pnpm test -- --test-reporter=tap > "run-$i.tap" 2>&1 || true
+              grep -E "^# (pass|fail)" "run-$i.tap" | tr '\n' ' ' | sed "s/^/::notice::plain $i: /"; echo; report "run-$i.tap" "plain $i"
+            fi
           done
