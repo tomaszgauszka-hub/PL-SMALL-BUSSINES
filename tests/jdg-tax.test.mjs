@@ -47,7 +47,9 @@ test('lump sum uses monthly income, half of paid health and carries unused deduc
  const r=report([entry(2,1000000)],{taxForm:'lump_sum'},[{...defaultJdgMonth(2026,1),healthPaid:100000,socialDeduction:50000}]);
  assert.equal(r.rows[0].pitDue,0);assert.equal(r.rows[1].pitDue,76500);assert.equal(r.primaryTax,76500);
  const negative=report([entry(2,100000,{net:-100000,vat:-23000,gross:-123000,lines:[{...entry(2,100000).lines[0],quantityMilli:-1000}]})],{taxForm:'lump_sum'});
- assert.equal(negative.rows[1].pitDue,null);assert.equal(negative.annualValid,false);
+ // art. 6 ust. 1e: a reduction exceeding the period's revenue moves to the following periods;
+ // a reduction still uncovered at the end of the year blocks the annual result.
+ assert.equal(negative.rows[1].pitDue,0);assert.deepEqual(negative.rows[1].lumpSum.negativeCarry,[{rateBps:850,amount:-100000}]);assert.equal(negative.annualValid,false);
 });
 test('lump sum eligibility is based on previous year, not this year turnover',()=>{
  assert.equal(lumpSumEligibilityLimit(2026),851720000);assert.equal(lumpSumEligibilityLimit(2025),856920000);
@@ -92,4 +94,24 @@ test('JDG tax configuration remains private and anonymous RPC is denied',async()
  await asUser(db,bob);assert.equal((await state()).months.length,0);assert.equal((await state()).years.length,0);await assert.rejects(rpc('mk_jdg_tax_mutate','year',config()),/konfigurację JDG/);
  await assert.rejects(db.query("insert into public.mk_jdg_months(owner,year,month) values($1,2026,2)",[alice]),/row-level security/);
  await db.exec('reset role;set role anon');await assert.rejects(db.query('select public.mk_jdg_tax_state()'),/permission denied/);
+});
+
+test('ryczałt report separates revenue categories, applies the pkt 4 threshold and records verification',()=>{
+ const line=(price,category,rate)=>({name:'Usługa',unit:'szt.',quantityMilli:1000,unitPrice:price,vatRate:'23',lumpSumRate:rate,discountBps:0,productId:'',revenueCategory:category,classificationSource:'user_confirmed'});
+ const doc=(month,lines,extra={})=>{const date=`2026-${String(month).padStart(2,'0')}-10`,totals=calculateInvoice(lines);return {id:crypto.randomUUID(),status:'issued',direction:'sale',kind:'regular',issueDate:date,receivedDate:date,taxDate:date,vatDate:date,saleDate:date,lines,...totals,deductibleVat:0,pitCost:0,costCategory:'other',costDeductionBps:0,vatDeductionBps:0,parentId:'',vatLimitIncluded:true,supplyStructure:'separate',...extra};};
+ const r=report([doc(1,[line(9000000,'p4-d',850)]),doc(2,[line(3000000,'p4-d',850),line(1000000,'p6-a',550)])],{taxForm:'lump_sum',previousYearRevenue:0});
+ // January 90 000 × 8,5% = 7 650. February: 10 000 × 8,5% + 20 000 × 12,5% + 10 000 × 5,5% = 850 + 2 500 + 550 = 3 900.
+ assert.equal(r.rows[0].pitDue,765000);assert.equal(r.rows[1].pitDue,390000);assert.equal(r.primaryTax,1155000);
+ assert.deepEqual(r.rows[1].lumpSum.buckets.map(b=>[b.rateBps,b.revenue]),[[550,1000000],[850,1000000],[1250,2000000]]);
+ assert.equal(r.reviewStatus,'AUTO_VERIFIED');assert.equal(r.verified,true);assert.equal(r.openDocuments,0);
+ const unconfirmed=report([doc(1,[{...line(100000,'p5-a',850),classificationSource:''}])],{taxForm:'lump_sum',previousYearRevenue:0});
+ assert.equal(unconfirmed.rows[0].pitDue,8500);assert.equal(unconfirmed.rows[0].review.status,'NEEDS_USER_INPUT');
+ assert.equal(unconfirmed.annualValid,true);assert.equal(unconfirmed.verified,false);assert.equal(unconfirmed.openDocuments,1);
+});
+test('a purchase recorded as a fixed asset blocks the PIT advance instead of a one-off cost',()=>{
+ const machine=entry(3,2000000,{direction:'purchase',pitCost:2000000,costDeductionBps:10000,costCategory:'other',issueDate:'2026-03-01',receivedDate:'2026-03-01',reviewAnswers:{'purchase.fixed_asset':'fixed_asset'}});
+ const r=report([entry(3,5000000),machine]);
+ assert.equal(r.rows[2].pitDue,null);assert.equal(r.annualValid,false);assert.equal(r.reviewStatus,'UNSUPPORTED_OR_INVALID');
+ const material=report([entry(3,5000000),{...machine,reviewAnswers:{'purchase.fixed_asset':'not_fixed_asset'}}]);
+ assert.notEqual(material.rows[2].pitDue,null);assert.equal(material.verified,true);
 });

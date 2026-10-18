@@ -27,6 +27,9 @@ export function parseMoney(input: unknown): number {
 }
 export function decimal(value: number): string { return (value / 100).toFixed(2); }
 export function today(): string { return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Warsaw" }).format(new Date()); }
+// The verified rules end on this date. Default form dates never leave the supported range.
+export const LAST_SUPPORTED_DATE = "2026-12-31";
+export function workDate(): string { const date = today(); return date > LAST_SUPPORTED_DATE ? LAST_SUPPORTED_DATE : date; }
 export function validDate(input: unknown): input is string { if (typeof input !== "string" || !/^(19|20)\d{2}-\d{2}-\d{2}$/.test(input)) return false; const d = new Date(input + "T12:00:00Z"); return !Number.isNaN(d.valueOf()) && d.toISOString().slice(0, 10) === input; }
 export function dateLabel(value: string): string { return value ? value.split("-").reverse().join(".") : "—"; }
 export function periodRule(year: number) { if (year === 2025) return { limit: 349950, periods: 12, label: "miesiąc", short: "M" }; if (year === 2026) return { limit: 1081350, periods: 4, label: "kwartał", short: "Q" }; return null; }

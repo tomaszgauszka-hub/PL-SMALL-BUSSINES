@@ -1,0 +1,40 @@
+name: Zrzuty ekranu demo
+on:
+  push:
+    branches: ["feature/**"]
+permissions:
+  contents: write
+jobs:
+  screenshots:
+    if: contains(github.event.head_commit.message, '[screenshots]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.25.0
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Playwright
+        run: |
+          mkdir -p "$RUNNER_TEMP/shots" && cd "$RUNNER_TEMP/shots" && npm init -y >/dev/null && npm install --no-audit --no-fund playwright@1.56.1 && npx playwright install --with-deps chromium
+      - name: Capture demo
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/shots"
+          nohup pnpm start > "$RUNNER_TEMP/server.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://127.0.0.1:3000/ >/dev/null && break; sleep 1; done
+          cp scripts/screenshots.mjs "$RUNNER_TEMP/shots/run.mjs"
+          OUT="$GITHUB_WORKSPACE/shots" node "$RUNNER_TEMP/shots/run.mjs" | tee "$GITHUB_WORKSPACE/shots/log.txt" || true
+          tail -n 40 "$RUNNER_TEMP/server.log" > "$GITHUB_WORKSPACE/shots/server-log.txt"
+      - name: Publish to ci-screenshots branch
+        run: |
+          cd shots
+          git init -q -b ci-screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Demo screenshots for ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-screenshots
