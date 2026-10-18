@@ -93,3 +93,10 @@ Rzeczywisty test adaptera 17.10.2026 zakończył się statusem MF 200, nadanym n
 Migracje `20261017111004_ksef_test_workspaces.sql` i `20261017115254_ksef_test_documents.sql` zastosowano w istniejącym projekcie. Obecnie 23 tabele public.mk_* mają RLS. Prywatna dzierżawa w mk_private chroni jednoczesne operacje z dwóch urządzeń, a utrwalony etap przed POST chroni przed ponowieniem nieustalonej wysyłki. Dane testowe nie mają relacji do ewidencji PIT/VAT ani klientów.
 
 Zestaw 100 testów obejmuje podpis i jego naruszenie, szyfrowanie/odszyfrowanie, wszystkie stawki i oficjalne XSD, zgodność hashy, UPO, 429, utratę odpowiedzi, blokadę nieudanego checkpointu, RLS oraz lease. Klucze prywatne i tokeny nie są utrwalane. Zakres: tylko TEST, JDG i zwykłe faktury krajowe PLN; korekty, zaliczki, offline24, spółki i produkcyjny KSeF pozostają poza tym modułem.
+
+
+## Księgowość P0 i zamknięcie projektu — 17–18.10.2026, PR #6
+
+Wersjonowany rejestr reguł z podstawą prawną, ryczałt według rodzajów przychodu z art. 12 ust. 1 (55 pozycji, próg 8,5% / 12,5%, proporcjonalne odliczenia, przenoszenie korekt), ocena dokumentów niejednoznacznych, panel „Rozlicz miesiąc” i publiczne demo JDG na ryczałcie wielostawkowym. 136 testów; bez migracji bazy. Szczegóły: [ACCOUNTING_IMPLEMENTATION_STATUS.md](ACCOUNTING_IMPLEMENTATION_STATUS.md).
+
+18.10.2026 projekt zakończono jako portfolio: KSeF pozostaje w środowisku TEST, obsługiwane lata 2025–2026. Podsumowanie: [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md).

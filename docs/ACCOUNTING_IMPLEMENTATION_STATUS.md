@@ -76,8 +76,26 @@ Zobacz [JDG_COVERAGE_MATRIX.md](JDG_COVERAGE_MATRIX.md). Najważniejsze: ZUS, de
 
 ### Kolejne zadania
 
-1. P0: tabela `mk_tax_decisions` (tylko dopisywanie) i odpowiadanie na pytania dla wystawionych dokumentów; rodzaj przychodu w katalogu; zapis odpowiedzi z art. 8 w profilu roku.
-2. P0: przygotowanie roku 2027 według [PLAN-2027.md](PLAN-2027.md) — obsługiwane lata, reguły 2027, otwarcie roku, KSeF produkcyjny.
-3. P1: kalkulator ZUS i składki zdrowotnej (wersjonowane reguły 2025–2026, zależność od formy opodatkowania), DRA i KEDU.
-4. P1: JPK_V7M, zestawienie PIT-28, panel „Rozlicz miesiąc” ze statusami deklaracji i wpłat.
-5. P1: `docs/BEFORE_START_ACCOUNTING_PL.md`, projekt regulaminu i polityki prywatności, onboarding.
+Etap zamknięty. Zadania, które byłyby następne, wymienia [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md).
+
+## Etap portfolio — 18.10.2026, PR #6
+
+Decyzja: projekt kończy się jako portfolio. KSeF zostaje w bezpłatnym środowisku TEST, nie realizujemy [PLAN-2027.md](PLAN-2027.md).
+
+### Zaimplementowane
+
+| Moduł | Pliki | Stan |
+| --- | --- | --- |
+| Rozlicz miesiąc | `lib/month-settlement.ts`, `app/month-settlement-panel.tsx` | Działa. Osiem kroków: dokumenty (szkice, luki w numeracji, możliwe duplikaty zakupów), sprawy do decyzji z przejściem do dokumentu, przychody według stawek, ryczałt lub zaliczka PIT, VAT, wpisane składki, terminy i wpłaty (oczekuje / po terminie / zapłacone), obowiązki deklaracyjne. Status miesiąca: rozliczony, do zapłaty, wstępny, wymaga poprawy. Eksport CSV. Bez utrwalania zamknięcia. |
+| Demo JDG | `lib/demo-jdg.ts` | Działa. Fikcyjna pracownia na ryczałcie z czterema stawkami (3%, 5,5%, 8,5%, 14%), czynny VAT, korekta zwrotu, paliwo przy użytku mieszanym, zapłacone składki 2026; styczeń–sierpień opłacone, wrzesień do zapłaty, październik z otwartymi pytaniami i szkicem. Publiczne demo otwiera się na JDG. |
+| Spójność formy opodatkowania | `lib/document-review.ts`, `lib/jdg-tax.ts`, `app/invoice-workbench.tsx` | Faktury oceniane według formy opodatkowania roku dokumentu (ustawienia roku), a nie bieżącego profilu. Wspólna funkcja `jdgReport` dla pulpitu, wydruku i rozliczenia. |
+| Daty po 2026 r. | `lib/domain.ts` (`workDate`) | Domyślne daty formularzy nie wychodzą poza 31.12.2026, więc demo działa po końcu roku. |
+| Zrzuty ekranu | `scripts/screenshots.mjs`, `.github/workflows/screenshots.yml` | Build demo w CI i Playwright; zrzuty w `docs/screenshots/`. |
+
+### Testy
+
+136 testów (6 nowych w `tests/month-settlement.test.mjs`: dane demo, statusy miesięcy, termin po czasie, blokada przy błędnym ujęciu, luki i duplikaty, odmiana liczebników). Kontrola wizualna 10 zrzutów (desktop i mobile) bez błędów przeglądarki. Jeden przebieg CI dla commita `7847cc1` nie przeszedł kroku testów, a ponowienie bez zmian kodu przeszło — test niestabilny, przyczyny nie ustalono (logi CI nie były dostępne z sesji roboczej; podejrzane są testy KSeF z losowymi danymi).
+
+### Migracje
+
+Brak.

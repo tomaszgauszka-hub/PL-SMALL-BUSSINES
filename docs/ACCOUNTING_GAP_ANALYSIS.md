@@ -1,5 +1,7 @@
 # Ewidora — audyt księgowości JDG i analiza luk
 
+> 18.10.2026 projekt zakończono jako portfolio ([podsumowanie](PROJECT_SUMMARY.md)). Ustalenia K1 (rok 2027) i K2 (KSeF produkcyjny) pozostają świadomymi ograniczeniami tej wersji.
+
 Stan na 17.10.2026. Audyt objął gałąź `main` (commit `a018b59`, PR #1–#5), bazę Supabase projektu TaskOn (`booexvenlxuyrnamhsoi`), wdrożenie Vercel `plsmallbusiness` oraz dokumentację i testy. Zmiany wprowadzone po audycie opisuje [ACCOUNTING_IMPLEMENTATION_STATUS.md](ACCOUNTING_IMPLEMENTATION_STATUS.md).
 
 Ocena funkcji:
